@@ -10,7 +10,8 @@ import {
   WalletCards,
 } from 'lucide-react';
 import { BankrollChart } from './components/BankrollChart';
-import { demoBankroll, demoExpensesTotal, demoWithdrawalsTotal } from './data/demoBankroll';
+import { demoBankroll, demoMonthlyWithdrawalsTotal, demoWithdrawalsTotal } from './data/demoBankroll';
+import { WinamaxImportPanel } from '../features/winamax/WinamaxImportPanel';
 import './dashboard.css';
 
 type Page = 'Dashboard' | 'Opérations' | 'Paramètres';
@@ -53,8 +54,8 @@ function Dashboard(): ReactElement {
       <MetricCard label="Bankroll actuelle" value={currency.format(currentBankroll)} icon={WalletCards} />
       <MetricCard label="Résultat du jour" value={signedCurrency(dailyResult)} icon={ArrowUpRight} result={dailyResult} />
       <MetricCard label="Résultat du mois" value={signedCurrency(monthlyResult)} icon={BarChart3} result={monthlyResult} />
-      <MetricCard label="Retraits" value={currency.format(demoWithdrawalsTotal)} icon={ArrowDownLeft} />
-      <MetricCard label="Dépenses" value={currency.format(demoExpensesTotal)} icon={CreditCard} />
+      <MetricCard label="Retraits totaux" value={currency.format(demoWithdrawalsTotal)} icon={ArrowDownLeft} />
+      <MetricCard label="Retraits du mois" value={currency.format(demoMonthlyWithdrawalsTotal)} icon={CreditCard} />
     </section>
     <section className="chart-card"><div className="dashboard-heading"><div><p className="section-kicker">ÉVOLUTION</p><h2>Bankroll</h2></div><div className="period-filters" aria-label="Période du graphique">{(['7', '30', 'all'] as Period[]).map((value) => <button key={value} className={period === value ? 'period-button active' : 'period-button'} onClick={() => setPeriod(value)}>{value === 'all' ? 'Tout' : `${value} jours`}</button>)}</div></div><span className="sr-only" aria-live="polite">Période affichée : {periodLabel}</span><BankrollChart data={displayedData} /></section>
   </>;
@@ -69,4 +70,4 @@ function MetricCard({ label, value, icon: Icon, result }: { label: string; value
 
 function Operations(): ReactElement { return <section className="empty-state"><div className="empty-state-icon"><CreditCard size={25} /></div><h2>Vos opérations</h2><p>Les dépôts, retraits et dépenses seront disponibles dans le prochain lot.</p></section>; }
 
-function SettingsPage(): ReactElement { return <section className="settings-card"><div className="settings-heading"><div className="settings-icon"><FolderOpen size={22} /></div><div><p className="section-kicker">SOURCE DE DONNÉES</p><h2>Historique Winamax</h2></div></div><div className="directory-row"><div><span className="field-label">Import navigateur</span><strong>Import des historiques Winamax (version navigateur) — fonctionnalité en cours de développement.</strong></div></div></section>; }
+function SettingsPage(): ReactElement { return <section className="settings-card"><div className="settings-heading"><div className="settings-icon"><FolderOpen size={22} /></div><div><p className="section-kicker">SOURCE DE DONNÉES</p><h2>Historique Winamax</h2></div></div><div className="directory-row"><div><span className="field-label">Import navigateur</span><strong>Prévisualisez des historiques sélectionnés localement dans Google Chrome.</strong></div></div><WinamaxImportPanel /></section>; }

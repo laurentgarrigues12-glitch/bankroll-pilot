@@ -11,4 +11,4 @@ export const demoBankroll: DemoBankrollPoint[] = [
 ].map(([date, bankroll, dailyResult]) => ({ date: String(date), bankroll: Number(bankroll), dailyResult: Number(dailyResult) }));
 
 export const demoWithdrawalsTotal = 180;
-export const demoExpensesTotal = 95;
+export const demoMonthlyWithdrawalsTotal = 45;
