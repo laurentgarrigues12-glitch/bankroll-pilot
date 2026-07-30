@@ -90,4 +90,12 @@ describe('WinamaxImportPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Confirmer' }));
     await waitFor(() => expect(mocks.importWinamaxOperations).toHaveBeenCalledWith([expect.objectContaining({ type: 'adjustment', amountCents: 0, importKey: 'tournament:1155086037:hero' })]));
   });
+
+  it('displays the total tournament cost including fees', async () => {
+    render(<WinamaxImportPage onImported={onImported} />);
+    const paidMain = mainFixture.replace('0€ + 0€', '9.30€ + 0.70€');
+    const paidSummary = summaryFixture.replace('0€ + 0€', '9.30€ + 0.70€');
+    fireEvent.change(screen.getByLabelText('Fichiers Winamax'), { target: { files: [file('paid.txt', paidMain), file('paid_summary.txt', paidSummary)] } });
+    expect(await screen.findByText('10,00 €')).toBeInTheDocument();
+  });
 });

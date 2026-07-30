@@ -7,6 +7,7 @@ export interface WinamaxPreviewEntry {
   playerName?: string;
   handCount?: number;
   buyInCents?: number;
+  feeCents?: number;
   finishingPosition?: number;
   registeredPlayers?: number;
   date?: string;
