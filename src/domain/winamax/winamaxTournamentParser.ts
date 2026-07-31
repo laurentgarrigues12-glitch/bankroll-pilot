@@ -13,7 +13,7 @@ export const parseWinamaxTournamentFile = (content: string, sourceFile: string):
   const startedAt = start === '' ? '' : new Date(`${start.replace(/\//g, '-').replace(/\s*UTC\s*$/i, '')}Z`).toISOString();
   const buyInSource = /buyIn:\s*([^\n]+)/i.exec(content)?.[1] ?? field(content, 'Buy-In');
   const moneyParts = [...(buyInSource ?? '').matchAll(/(\d+(?:[,.]\d+)?)\s*(?:€|â‚¬)/g)].map((match) => cents(match[1]));
-  const prize = /(?:You won|Prize won|Player prize)\s*:\s*([^\n]+)/i.exec(content)?.[1];
+  const prize = /(?:You won|Prize won|Player prize)\s*:?[ \t]*([^\n]+)/i.exec(content)?.[1];
   const duration = /(\d+)\s*min(?:ute)?s?\s*(\d+)?\s*s?/i.exec(field(content, 'You played') ?? '');
   const position = /(\d+)(?:st|nd|rd|th|e)?/i.exec(field(content, 'You finished') ?? '')?.[1];
   const players = /(\d+)/.exec(field(content, 'Registered players') ?? '')?.[1];
@@ -21,4 +21,34 @@ export const parseWinamaxTournamentFile = (content: string, sourceFile: string):
   return { tournamentId, tournamentName: title, playerName: player, startedAt, durationSeconds: duration === null ? undefined : Number(duration[1]) * 60 + Number(duration[2] ?? 0), buyInCents, feeCents, prizeCents, netResultCents: prizeCents - buyInCents - feeCents, finishingPosition: position === undefined ? undefined : Number(position), registeredPlayers: players === undefined ? undefined : Number(players), gameMode: field(content, 'Mode'), gameType: field(content, 'Type'), speed: field(content, 'Speed'), handCount: headers.length, handIds: headers.map((header) => header[2]), sourceFiles: [sourceFile] };
 };
 
-export const mergeWinamaxTournaments = (items: ParsedWinamaxTournament[]): ParsedWinamaxTournament[] => [...items.reduce((result, item) => { const key = `${item.tournamentId}|${item.playerName}`; const previous = result.get(key); result.set(key, previous === undefined ? item : { ...previous, ...item, tournamentName: previous.tournamentName || item.tournamentName, startedAt: previous.startedAt || item.startedAt, handIds: [...previous.handIds, ...item.handIds], handCount: previous.handCount + item.handCount, sourceFiles: [...previous.sourceFiles, ...item.sourceFiles] }); return result; }, new Map<string, ParsedWinamaxTournament>()).values()];
+export const mergeWinamaxTournaments = (items: ParsedWinamaxTournament[]): ParsedWinamaxTournament[] => [...items.reduce((result, item) => {
+  const key = `${item.tournamentId}|${item.playerName}`;
+  const previous = result.get(key);
+  if (previous === undefined) { result.set(key, item); return result; }
+
+  const previousIsSummary = previous.sourceFiles.some((name) => /_summary\.txt$/i.test(name));
+  const itemIsSummary = item.sourceFiles.some((name) => /_summary\.txt$/i.test(name));
+  const summary = itemIsSummary ? item : previousIsSummary ? previous : undefined;
+  const buyInCents = summary?.buyInCents ?? (item.buyInCents || previous.buyInCents);
+  const feeCents = summary?.feeCents ?? (item.feeCents || previous.feeCents);
+  const prizeCents = summary?.prizeCents ?? Math.max(previous.prizeCents, item.prizeCents);
+  const handIds = [...new Set([...previous.handIds, ...item.handIds])];
+
+  result.set(key, {
+    ...previous,
+    ...item,
+    tournamentName: previous.tournamentName || item.tournamentName,
+    startedAt: previous.startedAt || item.startedAt,
+    durationSeconds: summary?.durationSeconds ?? previous.durationSeconds ?? item.durationSeconds,
+    buyInCents,
+    feeCents,
+    prizeCents,
+    netResultCents: prizeCents - buyInCents - feeCents,
+    finishingPosition: summary?.finishingPosition ?? previous.finishingPosition ?? item.finishingPosition,
+    registeredPlayers: summary?.registeredPlayers ?? previous.registeredPlayers ?? item.registeredPlayers,
+    handIds,
+    handCount: handIds.length,
+    sourceFiles: [...new Set([...previous.sourceFiles, ...item.sourceFiles])],
+  });
+  return result;
+}, new Map<string, ParsedWinamaxTournament>()).values()];
