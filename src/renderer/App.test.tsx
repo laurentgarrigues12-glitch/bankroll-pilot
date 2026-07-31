@@ -1,21 +1,89 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import '@testing-library/jest-dom/vitest';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+const mocks = vi.hoisted(() => ({
+  refresh: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock('./hooks/useBankrollData', () => ({
+  useBankrollData: () => ({
+    data: {
+      settings: {
+        id: 'current' as const,
+        initialBankrollCents: 10000,
+        currency: 'EUR' as const,
+        startDate: '2026-07-01',
+      },
+      snapshot: {
+        currentCents: 12500,
+        pokerTodayCents: 500,
+        pokerMonthCents: 2500,
+        depositMonthCents: 1000,
+        withdrawalMonthCents: 200,
+        pokerTotalCents: 2500,
+      },
+      hands: [],
+      operations: [],
+    },
+    loading: false,
+    error: null,
+    refresh: mocks.refresh,
+  }),
+}));
+
+vi.mock('./hooks/useAccessStatus', () => ({
+  useAccessStatus: () => ({
+    access: { status: 'trial', trialStartedAt: '2026-07-01T00:00:00.000Z', trialExpiresAt: '2026-07-04T00:00:00.000Z', remainingMilliseconds: 1, canRead: true, canWrite: true, canImport: true, canRestore: true, canExport: true, lastCheckedAt: '2026-07-01T00:00:00.000Z' },
+    loading: false,
+    error: null,
+    refresh: mocks.refresh,
+    startTrial: mocks.refresh,
+  }),
+}));
+
 import { App } from './App';
 
 describe('App', () => {
-  it('opens the browser import control in settings', async () => {
-    render(<App />);
-    fireEvent.click(screen.getByRole('button', { name: 'Paramètres' }));
-    expect(await screen.findByRole('button', { name: 'Sélectionner des historiques Winamax' })).toBeInTheDocument();
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
-  it('displays the primary demonstration cards and changes the chart period', async () => {
+  it('mounts the real dashboard with its current metrics', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 6, 31, 12, 0, 0));
+
     render(<App />);
-    expect(screen.getByText('Bankroll actuelle')).toBeInTheDocument();
-    expect(screen.getByText('Résultat du jour')).toBeInTheDocument();
-    expect(screen.getByText('Résultat du mois')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: '7 jours' }));
-    expect(await screen.findByText('Période affichée : 7 jours')).toBeInTheDocument();
+
+    expect(screen.getByText('31/07/2026')).not.toBeNull();
+    expect(screen.getByText('Bankroll actuelle')).not.toBeNull();
+    expect(screen.getByText('Résultat du jour')).not.toBeNull();
+    expect(screen.getByText('Résultat du mois')).not.toBeNull();
+    expect(screen.getByText('Dépôt du mois')).not.toBeNull();
+    expect(screen.getByText('Retraits du mois')).not.toBeNull();
+    expect(screen.getByRole('table')).not.toBeNull();
+    const headers = screen.getAllByRole('columnheader');
+    expect(headers).toHaveLength(6);
+    expect(headers.map((header) => header.textContent)).toEqual([
+      'Date',
+      'Bankroll actuelle',
+      'Résultat du jour',
+      'Résultat du mois',
+      'Dépôt du mois',
+      'Retraits du mois',
+    ]);
+    expect(screen.getByRole('columnheader', { name: 'Bankroll actuelle' })).not.toBeNull();
+    expect(screen.getByRole('columnheader', { name: 'Résultat du jour' })).not.toBeNull();
+    expect(screen.queryAllByRole('article')).toHaveLength(0);
+    expect(screen.queryByText('Premium')).toBeNull();
+    expect(screen.queryByText('Données de démonstration')).toBeNull();
+  });
+
+  it('opens the settings page through the existing navigation', () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Paramètres' }));
+
+    expect(screen.getByRole('heading', { name: 'Bankroll initiale' })).not.toBeNull();
+    expect(screen.getByRole('button', { name: 'Enregistrer' })).not.toBeNull();
   });
 });

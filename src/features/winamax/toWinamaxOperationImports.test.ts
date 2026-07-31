@@ -23,4 +23,8 @@ describe('toWinamaxOperationImports', () => {
     expect(toWinamaxOperationImports([entry])).toEqual([{ type: 'adjustment', amountCents: 0, date: '2026-07-25', comment: 'Expresso Nitro Freeroll — 3e sur 3 — 5 mains', importKey: 'tournament:1155086037:hero' }]);
     expect(toWinamaxOperationImports([{ ...entry, status: 'error' as const }])).toEqual([]);
   });
+
+  it('returns no operation when a preview entry cannot provide the required import data', () => {
+    expect(toWinamaxOperationImports([{ detectedType: 'Dépôt', originalDescription: 'incomplete preview', status: 'valid' as const, message: 'Ligne valide.' }])).toEqual([]);
+  });
 });

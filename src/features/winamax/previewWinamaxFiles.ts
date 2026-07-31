@@ -14,6 +14,8 @@ export interface WinamaxFilePreview {
 export interface WinamaxFilesPreview {
   files: WinamaxFilePreview[];
   entries: WinamaxPreviewEntry[];
+  /** Source file names, aligned with entries. Kept in memory only for folder imports. */
+  entrySourceFileNames: string[][];
   invalidFileNames: string[];
 }
 
@@ -64,5 +66,11 @@ export const previewWinamaxFiles = async (selectedFiles: File[]): Promise<Winama
     seenLines.add(key);
   }));
 
-  return { files, entries: [...files.flatMap((file) => file.entries), ...tournamentEntries], invalidFileNames };
+  const fileEntries = files.flatMap((file) => file.entries);
+  return {
+    files,
+    entries: [...fileEntries, ...tournamentEntries],
+    entrySourceFileNames: [...files.flatMap((file) => file.entries.map(() => [file.name])), ...parsedTournaments.tournaments.map((tournament) => tournament.sourceFiles)],
+    invalidFileNames,
+  };
 };

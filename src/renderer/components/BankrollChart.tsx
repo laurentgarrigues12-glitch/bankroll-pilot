@@ -1,19 +1,19 @@
 import { type ReactElement } from 'react';
 import { AlertCircle, BarChart3, LoaderCircle } from 'lucide-react';
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import type { DemoBankrollPoint } from '../data/demoBankroll';
+import type { BankrollChartPoint } from '../../application/bankroll/bankrollService';
 import './BankrollChart.css';
 
 export type ChartState = 'loading' | 'ready' | 'empty' | 'error';
 
 interface BankrollChartProps {
-  data: DemoBankrollPoint[];
+  data: BankrollChartPoint[];
   state?: ChartState;
 }
 
 const currency = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
 
-function ChartTooltip({ active, payload }: { active?: boolean; payload?: Array<{ payload: DemoBankrollPoint }> }): ReactElement | null {
+function ChartTooltip({ active, payload }: { active?: boolean; payload?: Array<{ payload: BankrollChartPoint }> }): ReactElement | null {
   if (!active || payload === undefined || payload.length === 0) return null;
   const point = payload[0].payload;
   const resultClass = point.dailyResult >= 0 ? 'positive' : 'negative';
