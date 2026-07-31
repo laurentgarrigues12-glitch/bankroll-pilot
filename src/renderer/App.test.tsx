@@ -65,11 +65,11 @@ describe('App', () => {
     expect(headers).toHaveLength(6);
     expect(headers.map((header) => header.textContent)).toEqual([
       'Date',
-      'Bankroll actuelle',
-      'Résultat du jour',
-      'Résultat du mois',
       'Dépôt du mois',
       'Retraits du mois',
+      'Résultat du mois',
+      'Résultat du jour',
+      'Bankroll actuelle',
     ]);
     expect(screen.getByRole('columnheader', { name: 'Bankroll actuelle' })).not.toBeNull();
     expect(screen.getByRole('columnheader', { name: 'Résultat du jour' })).not.toBeNull();

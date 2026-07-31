@@ -10,6 +10,7 @@ const state = vi.hoisted(() => ({ current: null as AccessState | null, startTria
 
 vi.mock('./hooks/useAccessStatus', () => ({ useAccessStatus: () => ({ access: state.current, loading: false, error: null, startTrial: state.startTrial, simulate: state.simulate, refresh: state.refresh }) }));
 vi.mock('./hooks/useBankrollData', () => ({ useBankrollData: () => ({ data: { settings: { id: 'current', initialBankrollCents: 10000, currency: 'EUR', startDate: '2026-01-01' }, snapshot: { currentCents: 11000, pokerTodayCents: 0, pokerMonthCents: 0, depositMonthCents: 0, withdrawalMonthCents: 0, pokerTotalCents: 0 }, hands: [], operations: [] }, loading: false, error: null, refresh: vi.fn() }) }));
+vi.mock('./hooks/useWinamaxAutoImport', () => ({ useWinamaxAutoImport: () => ({ state: 'idle', checkedAt: null, message: 'Import automatique simulé pour les tests d’accès.' }) }));
 
 import { App } from './App';
 import { SettingsPage } from './pages/SettingsPage';

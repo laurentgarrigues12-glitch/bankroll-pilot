@@ -1,4 +1,5 @@
 import { type ReactElement, useEffect, useState } from 'react';
+import type { WinamaxAutoImportStatus } from '../hooks/useWinamaxAutoImport';
 import { FolderOpen, Info } from 'lucide-react';
 import { bankrollService } from '../../application/bankroll/bankrollService';
 import { winamaxFolderService } from '../../application/winamax/winamaxFolderService';
@@ -12,11 +13,13 @@ import {
 interface WinamaxFolderSettingsProps {
   readOnly: boolean;
   onImported: () => Promise<void>;
+  autoImportStatus?: WinamaxAutoImportStatus;
 }
 
 export function WinamaxFolderSettings({
   readOnly,
   onImported,
+  autoImportStatus,
 }: WinamaxFolderSettingsProps): ReactElement {
   const [configuration, setConfiguration] = useState<WinamaxFolderConfiguration>();
   const [busy, setBusy] = useState(false);
@@ -193,6 +196,16 @@ export function WinamaxFolderSettings({
             </label>
           </div>
         </>
+      )}
+
+      {configuration !== undefined && autoImportStatus !== undefined && (
+        <div className={`winamax-auto-import-status ${autoImportStatus.state}`} role="status">
+          <strong>Import automatique</strong>
+          <span>{autoImportStatus.message}</span>
+          {autoImportStatus.checkedAt !== null && (
+            <small>Dernière vérification : {new Date(autoImportStatus.checkedAt).toLocaleTimeString('fr-FR')}</small>
+          )}
+        </div>
       )}
 
       {message !== null && (

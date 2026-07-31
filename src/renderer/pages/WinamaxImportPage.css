@@ -68,6 +68,45 @@
   margin: 0;
 }
 
+.winamax-first-import-guide {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--color-info) 11%, var(--color-surface)), color-mix(in srgb, var(--color-accent) 7%, var(--color-surface)));
+  border: 1px solid color-mix(in srgb, var(--color-info) 38%, var(--color-border));
+  border-radius: var(--radius-md);
+}
+
+.winamax-first-import-guide-icon {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  color: var(--color-info);
+  background: color-mix(in srgb, var(--color-info) 13%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-info) 35%, var(--color-border));
+  border-radius: var(--radius-sm);
+  place-items: center;
+}
+
+.winamax-first-import-guide h3 {
+  margin: 0 0 var(--space-2);
+  color: var(--color-text);
+  font-size: var(--text-base);
+}
+
+.winamax-first-import-guide ol {
+  display: grid;
+  gap: var(--space-2);
+  padding-left: 1.25rem;
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+}
+
+.winamax-first-import-guide strong { color: var(--color-text); }
+
 .winamax-folder-description,
 .winamax-folder-help,
 .winamax-folder-status,
@@ -174,6 +213,10 @@
 }
 
 @media (max-width: 600px) {
+  .winamax-first-import-guide {
+    grid-template-columns: 1fr;
+  }
+
   .winamax-folder-primary-actions,
   .winamax-folder-options {
     align-items: stretch;
@@ -189,3 +232,21 @@
     align-self: flex-start;
   }
 }
+
+
+.winamax-auto-import-status {
+  display: grid;
+  gap: .2rem;
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-text-secondary);
+  background: var(--color-surface-input);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+}
+.winamax-auto-import-status strong { color: var(--color-text); }
+.winamax-auto-import-status small { color: var(--color-text-muted); font-size: var(--text-xs); }
+.winamax-auto-import-status.imported { border-color: color-mix(in srgb, var(--color-success) 45%, var(--color-border)); }
+.winamax-auto-import-status.waiting { border-color: color-mix(in srgb, var(--color-warning) 45%, var(--color-border)); }
+.winamax-auto-import-status.permission_required,
+.winamax-auto-import-status.error { border-color: color-mix(in srgb, var(--color-error) 50%, var(--color-border)); }
