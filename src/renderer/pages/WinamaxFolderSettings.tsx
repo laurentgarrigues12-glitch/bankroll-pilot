@@ -1,5 +1,5 @@
 import { type ReactElement, useEffect, useState } from 'react';
-import { FolderOpen, RefreshCw } from 'lucide-react';
+import { FolderOpen, Info } from 'lucide-react';
 import { bankrollService } from '../../application/bankroll/bankrollService';
 import { winamaxFolderService } from '../../application/winamax/winamaxFolderService';
 import { toWinamaxOperationImports } from '../../features/winamax/toWinamaxOperationImports';
@@ -96,7 +96,7 @@ export function WinamaxFolderSettings({
         directoryHandle: handle,
         directoryName: handle.name,
         selectedAt: new Date().toISOString(),
-        autoScanEnabled: false,
+        autoScanEnabled: true,
       };
 
       await winamaxFolderService.saveConfiguration(next);
@@ -113,18 +113,6 @@ export function WinamaxFolderSettings({
     }
   };
 
-  const rescan = async (): Promise<void> => {
-    setBusy(true);
-    setMessage(null);
-
-    try {
-      await scanAndImport();
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'L’import du dossier Winamax a échoué.');
-    } finally {
-      setBusy(false);
-    }
-  };
 
   const toggleAutomaticScan = async (): Promise<void> => {
     if (configuration === undefined) return;
@@ -144,6 +132,21 @@ export function WinamaxFolderSettings({
         <p className="section-kicker">IMPORTATION</p>
         <h2 id="winamax-folder-title">Dossier Winamax</h2>
       </header>
+
+      <aside className="winamax-first-import-guide" aria-labelledby="winamax-first-import-title">
+        <div className="winamax-first-import-guide-icon" aria-hidden="true">
+          <Info size={19} />
+        </div>
+        <div>
+          <h3 id="winamax-first-import-title">Avant le premier import</h3>
+          <ol>
+            <li>Dans le dossier <strong>Documents</strong> de votre ordinateur, créez un dossier nommé <strong>History</strong>.</li>
+            <li>Dans Winamax, allez dans <strong>Paramètres → Tracker → Emplacement de l’historique des mains</strong>.</li>
+            <li>Cliquez sur <strong>Changer</strong>, puis sélectionnez le dossier <strong>History</strong> créé dans Documents.</li>
+            <li>Dans Bankroll Pilot, sélectionnez ce même dossier <strong>History</strong>.</li>
+          </ol>
+        </div>
+      </aside>
 
       {!supported ? (
         <p className="winamax-folder-description">{directoryPickerCompatibilityMessage}</p>
@@ -176,15 +179,6 @@ export function WinamaxFolderSettings({
             >
               <FolderOpen size={17} /> Changer de dossier
             </button>
-            <button
-              className="button-secondary"
-              type="button"
-              disabled={busy || readOnly}
-              onClick={() => void rescan()}
-            >
-              <RefreshCw size={17} />
-              {busy ? 'Import en cours…' : 'Rescanner'}
-            </button>
           </div>
 
           <div className="winamax-folder-options">
@@ -195,7 +189,7 @@ export function WinamaxFolderSettings({
                 disabled={busy || readOnly}
                 onChange={() => void toggleAutomaticScan()}
               />
-              <span>Scanner automatiquement à l’ouverture</span>
+              <span>Importer automatiquement les nouvelles mains</span>
             </label>
           </div>
         </>
