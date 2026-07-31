@@ -40,5 +40,6 @@ export class UnavailableAccessProvider implements AccessProvider {
   async startTrial(): Promise<AccessState> { return unavailable(Date.now()); }
 }
 
-// The local provider is deliberately development-only and offers no production security.
-export const accessProvider: AccessProvider = import.meta.env.DEV || import.meta.env.MODE === 'test' ? new LocalDevelopmentAccessProvider() : new UnavailableAccessProvider();
+// The private beta has no backend: access and the 72-hour trial are stored locally in the browser.
+// Development simulations remain unavailable in production because accessService guards them with import.meta.env.DEV.
+export const accessProvider: AccessProvider = new LocalDevelopmentAccessProvider();
