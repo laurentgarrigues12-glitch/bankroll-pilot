@@ -150,38 +150,9 @@
   align-items: center;
 }
 
-.winamax-folder-options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-4);
-  align-items: center;
-  justify-content: space-between;
-  padding-top: var(--space-1);
-}
 
-.winamax-auto-scan-option {
-  display: inline-flex;
-  gap: var(--space-2);
-  align-items: center;
-  color: var(--color-text);
-  font-size: var(--text-sm);
-  font-weight: 600;
-  cursor: pointer;
-}
 
-.winamax-auto-scan-option input {
-  width: 1rem;
-  height: 1rem;
-  margin: 0;
-  accent-color: var(--color-accent);
-  cursor: pointer;
-}
 
-.winamax-auto-scan-option input:disabled,
-.winamax-auto-scan-option:has(input:disabled) {
-  cursor: not-allowed;
-  opacity: .6;
-}
 
 .winamax-forget-folder {
   padding-inline: 0;
@@ -217,8 +188,7 @@
     grid-template-columns: 1fr;
   }
 
-  .winamax-folder-primary-actions,
-  .winamax-folder-options {
+  .winamax-folder-primary-actions {
     align-items: stretch;
     flex-direction: column;
   }
@@ -232,21 +202,3 @@
     align-self: flex-start;
   }
 }
-
-
-.winamax-auto-import-status {
-  display: grid;
-  gap: .2rem;
-  padding: var(--space-3) var(--space-4);
-  color: var(--color-text-secondary);
-  background: var(--color-surface-input);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  font-size: var(--text-sm);
-}
-.winamax-auto-import-status strong { color: var(--color-text); }
-.winamax-auto-import-status small { color: var(--color-text-muted); font-size: var(--text-xs); }
-.winamax-auto-import-status.imported { border-color: color-mix(in srgb, var(--color-success) 45%, var(--color-border)); }
-.winamax-auto-import-status.waiting { border-color: color-mix(in srgb, var(--color-warning) 45%, var(--color-border)); }
-.winamax-auto-import-status.permission_required,
-.winamax-auto-import-status.error { border-color: color-mix(in srgb, var(--color-error) 50%, var(--color-border)); }

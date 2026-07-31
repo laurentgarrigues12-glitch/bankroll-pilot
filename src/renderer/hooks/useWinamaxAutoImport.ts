@@ -56,14 +56,6 @@ export function useWinamaxAutoImport(
           return;
         }
 
-        if (configuration.autoScanEnabled !== true) {
-          setStatus({
-            state: 'idle',
-            checkedAt: null,
-            message: 'L’import automatique est désactivé.',
-          });
-          return;
-        }
 
         const result = await winamaxFolderService.scan(false);
         if (!active) return;

@@ -1,5 +1,4 @@
 import { type ReactElement, useEffect, useState } from 'react';
-import type { WinamaxAutoImportStatus } from '../hooks/useWinamaxAutoImport';
 import { FolderOpen, Info } from 'lucide-react';
 import { bankrollService } from '../../application/bankroll/bankrollService';
 import { winamaxFolderService } from '../../application/winamax/winamaxFolderService';
@@ -13,13 +12,11 @@ import {
 interface WinamaxFolderSettingsProps {
   readOnly: boolean;
   onImported: () => Promise<void>;
-  autoImportStatus?: WinamaxAutoImportStatus;
 }
 
 export function WinamaxFolderSettings({
   readOnly,
   onImported,
-  autoImportStatus,
 }: WinamaxFolderSettingsProps): ReactElement {
   const [configuration, setConfiguration] = useState<WinamaxFolderConfiguration>();
   const [busy, setBusy] = useState(false);
@@ -117,18 +114,6 @@ export function WinamaxFolderSettings({
   };
 
 
-  const toggleAutomaticScan = async (): Promise<void> => {
-    if (configuration === undefined) return;
-
-    const next = {
-      ...configuration,
-      autoScanEnabled: !configuration.autoScanEnabled,
-    };
-
-    await winamaxFolderService.saveConfiguration(next);
-    setConfiguration(next);
-  };
-
   return (
     <section className="backup-card winamax-folder-card" aria-labelledby="winamax-folder-title">
       <header className="winamax-folder-header">
@@ -184,28 +169,7 @@ export function WinamaxFolderSettings({
             </button>
           </div>
 
-          <div className="winamax-folder-options">
-            <label className="winamax-auto-scan-option">
-              <input
-                type="checkbox"
-                checked={configuration.autoScanEnabled}
-                disabled={busy || readOnly}
-                onChange={() => void toggleAutomaticScan()}
-              />
-              <span>Importer automatiquement les nouvelles mains</span>
-            </label>
-          </div>
         </>
-      )}
-
-      {configuration !== undefined && autoImportStatus !== undefined && (
-        <div className={`winamax-auto-import-status ${autoImportStatus.state}`} role="status">
-          <strong>Import automatique</strong>
-          <span>{autoImportStatus.message}</span>
-          {autoImportStatus.checkedAt !== null && (
-            <small>Dernière vérification : {new Date(autoImportStatus.checkedAt).toLocaleTimeString('fr-FR')}</small>
-          )}
-        </div>
       )}
 
       {message !== null && (

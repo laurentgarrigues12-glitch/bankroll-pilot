@@ -106,15 +106,14 @@ describe('useWinamaxAutoImport', () => {
     expect(result.current.message).toMatch(/autorisation/i);
   });
 
-  it('does nothing when automatic import is disabled in the folder configuration', async () => {
+  it('keeps automatic import active for a legacy folder configuration', async () => {
     mocks.getConfiguration.mockResolvedValue({ autoScanEnabled: false });
     const onImported = vi.fn().mockResolvedValue(undefined);
-    const { result } = renderHook(() => useWinamaxAutoImport(true, onImported));
+    renderHook(() => useWinamaxAutoImport(true, onImported));
 
-    await waitFor(() => expect(result.current.message).toMatch(/désactivé/i));
+    await waitFor(() => expect(onImported).toHaveBeenCalledTimes(1));
 
-    expect(mocks.scan).not.toHaveBeenCalled();
-    expect(onImported).not.toHaveBeenCalled();
+    expect(mocks.scan).toHaveBeenCalledWith(false);
   });
 
 

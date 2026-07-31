@@ -42,6 +42,9 @@ describe('WinamaxImportPage', () => {
     expect(screen.getByText(/Paramètres → Tracker → Emplacement de l’historique des mains/i)).not.toBeNull();
     expect(screen.getByRole('button', { name: 'Choisir le dossier Winamax' })).not.toBeNull();
     expect(screen.queryByText('Import manuel')).toBeNull();
+    expect(screen.queryByText('Importer automatiquement les nouvelles mains')).toBeNull();
+    expect(screen.queryByText('Import automatique')).toBeNull();
+    expect(screen.queryByText(/Dernière vérification/i)).toBeNull();
     await waitFor(() => expect(mocks.getConfiguration).toHaveBeenCalled());
   });
 
