@@ -47,6 +47,7 @@ describe('Access states in the application UI', () => {
   it('keeps full application actions available during an active trial', () => {
     render(<App />);
     expect(screen.getByText('Essai gratuit en cours')).not.toBeNull();
+    expect(screen.queryByRole('button', { name: 'Acheter Bankroll Pilot' })).toBeNull();
     expect(screen.getByText('Bankroll actuelle')).not.toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Opérations' }));
     expect((screen.getByRole('button', { name: 'Enregistrer' }) as HTMLButtonElement).disabled).toBe(false);
@@ -57,6 +58,8 @@ describe('Access states in the application UI', () => {
   it('keeps data readable but disables writes after expiration', () => {
     state.current = access('expired'); render(<App />);
     expect(screen.getByText('Votre période d’essai est terminée')).not.toBeNull();
+    expect(screen.queryByRole('button', { name: 'Acheter Bankroll Pilot' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'J’ai déjà acheté' })).toBeNull();
     expect(screen.getByText('Bankroll actuelle')).not.toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Opérations' }));
     expect((screen.getByRole('button', { name: 'Enregistrer' }) as HTMLButtonElement).disabled).toBe(true);
