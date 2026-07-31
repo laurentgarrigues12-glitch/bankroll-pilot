@@ -129,7 +129,7 @@ export function WinamaxFolderSettings({
           <h3 id="winamax-first-import-title">Avant le premier import</h3>
           <ol>
             <li>Dans le dossier <strong>Documents</strong> de votre ordinateur, créez un dossier nommé <strong>History</strong>.</li>
-            <li>Dans Winamax, allez dans <strong>Paramètres → Tracker → Emplacement de l’historique des mains</strong>.</li>
+            <li>Dans Winamax : <strong>Paramètres → Tracker → Emplacement de l’historique des mains</strong>.</li>
             <li>Cliquez sur <strong>Changer</strong>, puis sélectionnez le dossier <strong>History</strong> créé dans Documents.</li>
             <li>Dans Bankroll Pilot, sélectionnez ce même dossier <strong>History</strong>.</li>
           </ol>
