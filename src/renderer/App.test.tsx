@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
@@ -87,20 +87,14 @@ describe('App', () => {
     expect(screen.getByText('Résultat du mois')).not.toBeNull();
     expect(screen.getByText('Dépôt du mois')).not.toBeNull();
     expect(screen.getByText('Retraits du mois')).not.toBeNull();
-    expect(screen.getByRole('table')).not.toBeNull();
-    const headers = screen.getAllByRole('columnheader');
-    expect(headers).toHaveLength(6);
-    expect(headers.map((header) => header.textContent)).toEqual([
-      'Date',
-      'Dépôt du mois',
-      'Retraits du mois',
-      'Résultat du mois',
-      'Résultat du jour',
-      'Bankroll actuelle',
-    ]);
-    expect(screen.getByRole('columnheader', { name: 'Bankroll actuelle' })).not.toBeNull();
-    expect(screen.getByRole('columnheader', { name: 'Résultat du jour' })).not.toBeNull();
-    expect(screen.queryAllByRole('article')).toHaveLength(0);
+    const cards = screen.getAllByRole('article');
+    expect(cards).toHaveLength(6);
+    expect(screen.getByRole('article', { name: 'Date' })).not.toBeNull();
+    expect(screen.getByRole('article', { name: 'Dépôt du mois' })).not.toBeNull();
+    expect(screen.getByRole('article', { name: 'Retraits du mois' })).not.toBeNull();
+    expect(screen.getByRole('article', { name: 'Résultat du mois' })).not.toBeNull();
+    expect(screen.getByRole('article', { name: 'Résultat du jour' })).not.toBeNull();
+    expect(screen.getByRole('article', { name: 'Bankroll actuelle' })).not.toBeNull();
     expect(screen.queryByText('Premium')).toBeNull();
     expect(screen.queryByText('Données de démonstration')).toBeNull();
   });
@@ -120,10 +114,16 @@ describe('App', () => {
     render(<App />);
 
     expect(mocks.autoImport).toHaveBeenCalledWith(true, mocks.refresh);
-    const numericCells = screen.getAllByRole('cell').slice(1);
-    expect(numericCells).toHaveLength(5);
-    for (const cell of numericCells) {
-      expect(cell.textContent?.replace(/\s/g, ' ')).toBe('0 €');
+    const labels = [
+      'Dépôt du mois',
+      'Retraits du mois',
+      'Résultat du mois',
+      'Résultat du jour',
+      'Bankroll actuelle',
+    ];
+    for (const label of labels) {
+      const card = screen.getByRole('article', { name: label });
+      expect(within(card).getByText('0 €')).not.toBeNull();
     }
     expect(screen.queryByText('Configurez votre bankroll initiale')).toBeNull();
   });
@@ -141,9 +141,14 @@ describe('App', () => {
     render(<App />);
 
     const metricValue = (label: string): string => {
-      const header = screen.getByRole('columnheader', { name: label });
-      const index = screen.getAllByRole('columnheader').indexOf(header);
-      return screen.getAllByRole('cell')[index]?.textContent?.replace(/\s/g, ' ') ?? '';
+      const card = screen.getByRole('article', { name: label });
+      const value = card.querySelector('.summary-card-value');
+
+      if (!(value instanceof HTMLElement)) {
+        throw new Error(`Metric value not found: ${label}`);
+      }
+
+      return value.textContent?.replace(/\s/g, ' ') ?? '';
     };
 
     expect(metricValue('Bankroll actuelle')).toBe('-3,25 €');

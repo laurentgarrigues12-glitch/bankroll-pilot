@@ -7,17 +7,10 @@ import { App } from './App';
 const accessStorageKey = 'bankroll-pilot.access.local.v1';
 
 const metricValue = (label: string): HTMLElement => {
-  const headers = screen.getAllByRole('columnheader');
-  const columnIndex = headers.findIndex((header) => header.textContent === label);
+  const card = screen.getByRole('article', { name: label });
+  const value = card.querySelector('.summary-card-value');
 
-  if (columnIndex === -1) {
-    throw new Error(`Metric header not found: ${label}`);
-  }
-
-  const values = screen.getAllByRole('cell');
-  const value = values[columnIndex];
-
-  if (value === undefined) {
+  if (!(value instanceof HTMLElement)) {
     throw new Error(`Metric value not found: ${label}`);
   }
 

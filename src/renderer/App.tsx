@@ -1,13 +1,19 @@
 import { type ReactElement, useState } from 'react';
 import {
   AlertCircle,
+  ArrowDown,
+  ArrowUp,
   BarChart3,
+  CalendarDays,
+  Coins,
   CreditCard,
   FileUp,
   LayoutDashboard,
   LoaderCircle,
   Settings,
   SlidersHorizontal,
+  Target,
+  TrendingUp,
   WalletCards,
 } from 'lucide-react';
 import { bankrollService } from '../application/bankroll/bankrollService';
@@ -256,21 +262,49 @@ function Dashboard({
   const displayed =
     period === '7' ? series.slice(-7) : period === '30' ? series.slice(-30) : series;
   const snapshot = data.snapshot;
-  const summaryRows = [
-    { label: 'Date', value: localDate.format(new Date()) },
-    { label: 'Dépôt du mois', value: currency.format(snapshot.depositMonthCents / 100) },
-    { label: 'Retraits du mois', value: currency.format(snapshot.withdrawalMonthCents / 100) },
+  const summaryCards: {
+    label: string;
+    value: string;
+    icon: typeof CalendarDays;
+    tone?: 'accent' | 'positive' | 'negative';
+    result?: number;
+  }[] = [
+    {
+      label: 'Date',
+      value: localDate.format(new Date()),
+      icon: CalendarDays,
+      tone: 'accent',
+    },
+    {
+      label: 'Dépôt du mois',
+      value: currency.format(snapshot.depositMonthCents / 100),
+      icon: ArrowDown,
+      tone: 'accent',
+    },
+    {
+      label: 'Retraits du mois',
+      value: currency.format(snapshot.withdrawalMonthCents / 100),
+      icon: ArrowUp,
+      tone: 'accent',
+    },
     {
       label: 'Résultat du mois',
       value: signed(snapshot.pokerMonthCents),
+      icon: TrendingUp,
       result: snapshot.pokerMonthCents,
     },
     {
       label: 'Résultat du jour',
       value: signed(snapshot.pokerTodayCents),
+      icon: Target,
       result: snapshot.pokerTodayCents,
     },
-    { label: 'Bankroll actuelle', value: currency.format(snapshot.currentCents / 100) },
+    {
+      label: 'Bankroll actuelle',
+      value: currency.format(snapshot.currentCents / 100),
+      icon: Coins,
+      tone: 'accent',
+    },
   ];
   return (
     <>
@@ -292,37 +326,39 @@ function Dashboard({
           </div>
           <span>Données réelles</span>
         </div>
-        <div className="summary-table-wrapper">
-          <table className="summary-table summary-table-horizontal">
-            <thead>
-              <tr>
-                {summaryRows.map(({ label }) => (
-                  <th key={label} scope="col">
-                    {label}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                {summaryRows.map(({ label, value, result }) => (
-                  <td
-                    key={label}
-                    data-label={label}
-                    className={
-                      result === undefined || result === 0
-                        ? ''
-                        : result > 0
-                          ? 'positive'
-                          : 'negative'
-                    }
-                  >
-                    {value}
-                  </td>
-                ))}
-              </tr>
-            </tbody>
-          </table>
+        <div className="summary-cards-grid">
+          {summaryCards.map(({ label, value, icon: Icon, tone, result }) => {
+            const stateClass =
+              result === undefined || result === 0
+                ? tone === 'accent'
+                  ? 'accent'
+                  : ''
+                : result > 0
+                  ? 'positive'
+                  : 'negative';
+            const headingId = `summary-card-${label
+              .toLowerCase()
+              .normalize('NFD')
+              .replace(/[̀-ͯ]/g, '')
+              .replace(/[^a-z0-9]+/g, '-')
+              .replace(/^-|-$/g, '')}`;
+
+            return (
+              <article
+                key={label}
+                className={`summary-card ${stateClass}`.trim()}
+                aria-labelledby={headingId}
+              >
+                <div className="summary-card-icon" aria-hidden="true">
+                  <Icon size={20} />
+                </div>
+                <div className="summary-card-body">
+                  <h3 id={headingId}>{label}</h3>
+                  <p className="summary-card-value">{value}</p>
+                </div>
+              </article>
+            );
+          })}
         </div>
       </section>
       <section className="chart-card">
