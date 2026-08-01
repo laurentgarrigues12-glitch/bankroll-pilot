@@ -42,12 +42,13 @@ describe('App Winamax import integration', () => {
   });
 
   it('loads the real dashboard after a persisted older Winamax import', async () => {
+    const currentDate = new Date().toISOString().slice(0, 10);
     await expect(
       bankrollService.importWinamaxOperations([
         {
           type: 'adjustment',
           amountCents: 1000,
-          date: '2026-07-25',
+          date: currentDate,
           comment: 'Résultat Winamax',
           importKey: 'tournament:dashboard-integration:hero',
         },
@@ -62,7 +63,7 @@ describe('App Winamax import integration', () => {
         id: 'winamax:tournament:dashboard-integration:hero',
         type: 'adjustment',
         amountCents: 1000,
-        date: '2026-07-25',
+        date: currentDate,
         source: 'winamax',
         sourceId: 'tournament:dashboard-integration:hero',
       }),
@@ -72,7 +73,7 @@ describe('App Winamax import integration', () => {
       expect.objectContaining({
         type: 'adjustment',
         amountCents: 1000,
-        date: '2026-07-25',
+        date: currentDate,
         source: 'winamax',
         sourceId: 'tournament:dashboard-integration:hero',
       }),

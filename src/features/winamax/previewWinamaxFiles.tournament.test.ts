@@ -35,6 +35,26 @@ describe('previewWinamaxFiles tournament histories', () => {
     expect(preview.entries.map((entry) => entry.status)).toEqual(['error', 'error']);
   });
 
+  it('uses the local calendar date for a UTC tournament timestamp', async () => {
+    const startedAt = '2026-07-31T23:30:00.000Z';
+    const history = `Winamax Poker - Tournament "Expresso Nitro" buyIn: 0.23€ + 0.02€ level: 1 - HandId: #1234567890123456789-1-1 - Holdem no limit (10/20) - 2026/07/31 23:30:00 UTC
+Dealt to Hero [As Kd]`;
+    const summaryContent = `Winamax Poker - Tournament summary : Expresso Nitro(1234567890)
+Player : Hero
+Buy-In : 0.23€ + 0.02€
+Registered players : 3
+Tournament started 2026/07/31 23:30:00 UTC
+You finished in 2nd place`;
+    const preview = await previewWinamaxFiles([
+      new File([history], 'expresso(1234567890).txt'),
+      new File([summaryContent], 'expresso(1234567890)_summary.txt'),
+    ]);
+
+    const expected = new Date(startedAt);
+    const localDate = `${expected.getFullYear()}-${String(expected.getMonth() + 1).padStart(2, '0')}-${String(expected.getDate()).padStart(2, '0')}`;
+    expect(preview.entries[0]).toMatchObject({ date: localDate });
+  });
+
   it('keeps CSV parsing unchanged', async () => {
     const preview = await previewWinamaxFiles([new File(['2026-07-20;Dépôt;12,50'], 'transactions.csv')]);
     expect(preview.entries[0]).toMatchObject({ detectedType: 'Dépôt', amountCents: 1250 });

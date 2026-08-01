@@ -1,3 +1,4 @@
+import { toCalendarDate } from '../../domain/bankroll/calendarDate';
 import { parseWinamaxPreview, type WinamaxPreviewEntry, type WinamaxPreviewFormat } from '../../domain/winamax/winamaxPreviewParser';
 import { parseWinamaxTournamentFiles } from './parseWinamaxTournamentFiles';
 
@@ -33,7 +34,7 @@ export const previewWinamaxFiles = async (selectedFiles: File[]): Promise<Winama
     const hasSummary = tournament.sourceFiles.some((name) => /_summary\.txt$/i.test(name));
     const hasHistory = tournament.handCount > 0;
     const message = !hasSummary ? 'Le fichier summary du tournoi est manquant.' : !hasHistory ? 'L’historique de mains du tournoi est manquant.' : 'Tournoi importable.';
-    return { kind: 'tournament', tournamentId: tournament.tournamentId, playerName: tournament.playerName, handCount: tournament.handCount, buyInCents: tournament.buyInCents, feeCents: tournament.feeCents, finishingPosition: tournament.finishingPosition, registeredPlayers: tournament.registeredPlayers, date: tournament.startedAt.slice(0, 10), detectedType: tournament.tournamentName, amountCents: tournament.netResultCents, originalDescription: `${tournament.tournamentName} — ${tournament.finishingPosition ?? '?'}e sur ${tournament.registeredPlayers ?? '?'} — ${tournament.handCount} mains`, status: hasSummary && hasHistory ? 'valid' : 'error', message };
+    return { kind: 'tournament', tournamentId: tournament.tournamentId, playerName: tournament.playerName, handCount: tournament.handCount, buyInCents: tournament.buyInCents, feeCents: tournament.feeCents, finishingPosition: tournament.finishingPosition, registeredPlayers: tournament.registeredPlayers, date: toCalendarDate(tournament.startedAt), detectedType: tournament.tournamentName, amountCents: tournament.netResultCents, originalDescription: `${tournament.tournamentName} — ${tournament.finishingPosition ?? '?'}e sur ${tournament.registeredPlayers ?? '?'} — ${tournament.handCount} mains`, status: hasSummary && hasHistory ? 'valid' : 'error', message };
   });
 
   for (const file of selectedFiles) {

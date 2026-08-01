@@ -10,7 +10,14 @@ describe('BankrollChart', () => {
 
   it('renders the empty state without data', () => {
     render(<BankrollChart data={[]} state="empty" />);
-    expect(screen.getByText('Aucune donnée de bankroll à afficher.')).not.toBeNull();
+    expect(screen.getByRole('region', { name: 'Aucune donnée' })).not.toBeNull();
+    expect(screen.getByText('Votre courbe se dessinera ici')).not.toBeNull();
+    expect(screen.getByText('En attente de données')).not.toBeNull();
+    expect(
+      screen.getByText(
+        'Importez des parties Winamax ou ajoutez une opération pour démarrer le suivi.',
+      ),
+    ).not.toBeNull();
   });
 
   it('renders loading and error states', () => {

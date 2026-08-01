@@ -1,4 +1,7 @@
-.operations-page { display: grid; gap: var(--space-6); }
+.operations-page {
+  display: grid;
+  gap: var(--space-6);
+}
 .operations-heading {
   position: relative;
   display: grid;
@@ -6,7 +9,11 @@
   width: 100%;
   padding: var(--space-8);
   overflow: hidden;
-  background: linear-gradient(145deg, color-mix(in srgb, var(--color-surface) 94%, var(--color-accent)), var(--color-surface));
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--color-surface) 94%, var(--color-accent)),
+    var(--color-surface)
+  );
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
@@ -15,36 +22,242 @@
   position: absolute;
   inset: 0 0 auto;
   height: 1px;
-  content: "";
-  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-accent) 52%, transparent), transparent);
+  content: '';
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--color-accent) 52%, transparent),
+    transparent
+  );
 }
-.operations-heading h2, .operations-card h3 { margin: 0; color: var(--color-text); }
-.operations-heading > p:last-child { max-width: 42rem; margin: var(--space-1) 0 0; color: var(--color-text-secondary); }
-.operations-layout { display: grid; grid-template-columns: minmax(18rem, .85fr) minmax(0, 1.45fr); gap: var(--space-5); align-items: start; }
-.operations-card { position: relative; padding: var(--space-6); overflow: hidden; background: linear-gradient(145deg, color-mix(in srgb, var(--color-surface) 94%, var(--color-accent)), var(--color-surface)); border: 1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
-.operations-card::before { position: absolute; inset: 0 0 auto; height: 1px; content: ""; background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-accent) 52%, transparent), transparent); }
-.operations-card form { display: grid; gap: var(--space-4); margin-top: var(--space-5); }
-.operations-card label { display: grid; gap: var(--space-2); color: var(--color-text); font-size: var(--text-sm); font-weight: 600; }
-.operations-card input, .operations-card select, .operations-card textarea { width: 100%; color: var(--color-text); background: var(--color-surface-input); border: 1px solid var(--color-border); border-radius: var(--radius-sm); }
-.operations-card input, .operations-card select { min-height: 44px; padding: .65rem .75rem; }
-.operations-card textarea { min-height: 98px; padding: .7rem .75rem; }
-.operations-card input::placeholder, .operations-card textarea::placeholder { color: var(--color-text-muted); }
-.operations-card textarea { resize: vertical; }
-.optional-field { color: var(--color-text-muted); font-size: var(--text-xs); font-weight: 500; }
-.operations-card .secondary-button { width: 100%; margin-top: var(--space-1); }
-.operations-card [role="status"] { display: flex; align-items: center; min-height: 28px; margin: 0; color: var(--color-text-secondary); font-size: var(--text-sm); }
-.operations-table-wrapper { overflow-x: auto; margin-top: var(--space-5); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
-.operations-card table { width: 100%; min-width: 34rem; border-collapse: collapse; text-align: left; }
-.operations-card th, .operations-card td { padding: .85rem var(--space-3); color: var(--color-text); border-bottom: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent); font-size: var(--text-sm); }
-.operations-card th { position: sticky; top: 0; color: var(--color-text-secondary); font-size: var(--text-xs); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; background: var(--color-surface-input); }
-.operations-card tbody tr { transition: background var(--transition-fast); }
-.operations-card tbody tr:hover { background: color-mix(in srgb, var(--color-accent) 7%, transparent); }
-.operations-card tbody tr:last-child td { border-bottom: 0; }
-.operations-card th:nth-child(3), .operations-card td:nth-child(3) { text-align: right; font-variant-numeric: tabular-nums; }
-.operation-type { display: inline-flex; align-items: center; min-height: 26px; padding: .2rem .55rem; font-size: var(--text-xs); font-weight: 700; border: 1px solid transparent; border-radius: var(--radius-pill); }
-.operation-type.deposit { color: var(--color-success); background: color-mix(in srgb, var(--color-success) 12%, transparent); border-color: color-mix(in srgb, var(--color-success) 30%, var(--color-border)); }
-.operation-type.withdrawal { color: var(--color-info); background: color-mix(in srgb, var(--color-info) 11%, transparent); border-color: color-mix(in srgb, var(--color-info) 28%, var(--color-border)); }
-.operations-empty { display: grid; min-height: 210px; margin: var(--space-4) 0 0; color: var(--color-text-secondary); text-align: center; border: 1px dashed var(--color-border-strong); border-radius: var(--radius-md); place-content: center; }
-@media (min-width: 1180px) { .operations-card form { grid-template-columns: repeat(2, minmax(0, 1fr)); } .operations-card form label:nth-child(4) { grid-column: 1 / -1; } .operations-card form .secondary-button, .operations-card form [role="status"] { grid-column: 1 / -1; } }
-@media (max-width: 900px) { .operations-layout { grid-template-columns: 1fr; } }
-@media (max-width: 600px) { .operations-page { gap: var(--space-5); } .operations-heading, .operations-card { padding: var(--space-5); } .operations-table-wrapper { margin-inline: calc(var(--space-5) * -1); border-right: 0; border-left: 0; border-radius: 0; } .operations-card table { min-width: 31rem; } .operations-card th, .operations-card td { padding: .75rem var(--space-2); } }
+.operations-heading h2,
+.operations-card h3 {
+  margin: 0;
+  color: var(--color-text);
+}
+.operations-heading > p:last-child {
+  max-width: 42rem;
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-secondary);
+}
+.operations-layout {
+  display: grid;
+  grid-template-columns: minmax(18rem, 0.85fr) minmax(0, 1.45fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+.operations-card {
+  position: relative;
+  padding: var(--space-6);
+  overflow: hidden;
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--color-surface) 94%, var(--color-accent)),
+    var(--color-surface)
+  );
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+.operations-card::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  content: '';
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--color-accent) 52%, transparent),
+    transparent
+  );
+}
+.operations-card form {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-5);
+}
+.operations-card label {
+  display: grid;
+  gap: var(--space-2);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+.operations-card input,
+.operations-card select,
+.operations-card textarea {
+  width: 100%;
+  color: var(--color-text);
+  background: var(--color-surface-input);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+.operations-card input,
+.operations-card select {
+  min-height: 44px;
+  padding: 0.65rem 0.75rem;
+}
+.operations-card textarea {
+  min-height: 98px;
+  padding: 0.7rem 0.75rem;
+}
+.operations-card input::placeholder,
+.operations-card textarea::placeholder {
+  color: var(--color-text-muted);
+}
+.operations-card textarea {
+  resize: vertical;
+}
+.optional-field {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-weight: 500;
+}
+.operations-card .secondary-button {
+  width: 100%;
+  margin-top: var(--space-1);
+}
+.operations-card [role='status'] {
+  display: flex;
+  align-items: center;
+  min-height: 28px;
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+.operations-table-wrapper {
+  overflow-x: auto;
+  margin-top: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+.operations-card table {
+  width: 100%;
+  min-width: 34rem;
+  border-collapse: collapse;
+  text-align: left;
+}
+.operations-card th,
+.operations-card td {
+  padding: 0.85rem var(--space-3);
+  color: var(--color-text);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
+  font-size: var(--text-sm);
+}
+.operations-card th {
+  position: sticky;
+  top: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--color-surface-input);
+}
+.operations-card tbody tr {
+  transition: background var(--transition-fast);
+}
+.operations-card tbody tr:hover {
+  background: color-mix(in srgb, var(--color-accent) 7%, transparent);
+}
+.operations-card tbody tr:last-child td {
+  border-bottom: 0;
+}
+.operations-card th:nth-child(3),
+.operations-card td:nth-child(3) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.operation-type {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0.2rem 0.55rem;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+}
+.operation-type.deposit {
+  color: var(--color-success);
+  background: color-mix(in srgb, var(--color-success) 12%, transparent);
+  border-color: color-mix(in srgb, var(--color-success) 30%, var(--color-border));
+}
+.operation-type.withdrawal {
+  color: var(--color-info);
+  background: color-mix(in srgb, var(--color-info) 11%, transparent);
+  border-color: color-mix(in srgb, var(--color-info) 28%, var(--color-border));
+}
+.operations-empty {
+  display: grid;
+  min-height: 210px;
+  margin: var(--space-4) 0 0;
+  color: var(--color-text-secondary);
+  text-align: center;
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+  place-content: center;
+}
+@media (min-width: 1180px) {
+  .operations-card form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .operations-card form label:nth-child(4) {
+    grid-column: 1 / -1;
+  }
+  .operations-card form .secondary-button,
+  .operations-card form [role='status'] {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 900px) {
+  .operations-layout {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 600px) {
+  .operations-page {
+    gap: var(--space-5);
+  }
+  .operations-heading,
+  .operations-card {
+    padding: var(--space-5);
+  }
+  .operations-table-wrapper {
+    margin-inline: calc(var(--space-5) * -1);
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+  }
+  .operations-card table {
+    min-width: 31rem;
+  }
+  .operations-card th,
+  .operations-card td {
+    padding: 0.75rem var(--space-2);
+  }
+}
+
+.operations-empty {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  min-height: 250px;
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+  place-content: center;
+}
+.operations-empty h4 {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text);
+  font-size: var(--text-lg);
+}
+.operations-empty p {
+  max-width: 24rem;
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+.operation-type {
+  gap: 0.35rem;
+  align-items: center;
+}

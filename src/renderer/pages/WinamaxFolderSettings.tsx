@@ -1,5 +1,5 @@
 import { type ReactElement, useEffect, useState } from 'react';
-import { FolderOpen, Info } from 'lucide-react';
+import { CheckCircle2, FolderOpen, Info, MinusCircle, TriangleAlert } from 'lucide-react';
 import { bankrollService } from '../../application/bankroll/bankrollService';
 import { winamaxFolderService } from '../../application/winamax/winamaxFolderService';
 import { toWinamaxOperationImports } from '../../features/winamax/toWinamaxOperationImports';
@@ -21,6 +21,14 @@ export function WinamaxFolderSettings({
   const [configuration, setConfiguration] = useState<WinamaxFolderConfiguration>();
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const messageTone =
+    message === null
+      ? 'info'
+      : message === 'Import réussi.'
+        ? 'success'
+        : message.includes('annulée') || message === 'Aucun fichier importé.'
+          ? 'info'
+          : 'error';
   const supported = isDirectoryPickerSupported();
 
   useEffect(() => {
@@ -106,13 +114,14 @@ export function WinamaxFolderSettings({
       if (error instanceof DOMException && error.name === 'AbortError') {
         setMessage('Sélection du dossier annulée.');
       } else {
-        setMessage(error instanceof Error ? error.message : 'L’import du dossier Winamax a échoué.');
+        setMessage(
+          error instanceof Error ? error.message : 'L’import du dossier Winamax a échoué.',
+        );
       }
     } finally {
       setBusy(false);
     }
   };
-
 
   return (
     <section className="backup-card winamax-folder-card" aria-labelledby="winamax-folder-title">
@@ -128,10 +137,21 @@ export function WinamaxFolderSettings({
         <div>
           <h3 id="winamax-first-import-title">Avant le premier import</h3>
           <ol>
-            <li>Dans le dossier <strong>Documents</strong> de votre ordinateur, créez un dossier nommé <strong>History</strong>.</li>
-            <li>Dans Winamax : <strong>Paramètres → Tracker → Emplacement de l’historique des mains</strong>.</li>
-            <li>Cliquez sur <strong>Changer</strong>, puis sélectionnez le dossier <strong>History</strong> créé dans Documents.</li>
-            <li>Dans Bankroll Pilot, sélectionnez ce même dossier <strong>History</strong>.</li>
+            <li>
+              Dans le dossier <strong>Documents</strong> de votre ordinateur, créez un dossier nommé{' '}
+              <strong>History</strong>.
+            </li>
+            <li>
+              Dans Winamax :{' '}
+              <strong>Paramètres → Tracker → Emplacement de l’historique des mains</strong>.
+            </li>
+            <li>
+              Cliquez sur <strong>Changer</strong>, puis sélectionnez le dossier{' '}
+              <strong>History</strong> créé dans Documents.
+            </li>
+            <li>
+              Dans Bankroll Pilot, sélectionnez ce même dossier <strong>History</strong>.
+            </li>
           </ol>
         </div>
       </aside>
@@ -168,12 +188,21 @@ export function WinamaxFolderSettings({
               <FolderOpen size={17} /> Changer de dossier
             </button>
           </div>
-
         </>
       )}
 
       {message !== null && (
-        <p className="winamax-folder-status" role="status">
+        <p
+          className={`winamax-folder-status system-message ${messageTone}`}
+          role={messageTone === 'error' ? 'alert' : 'status'}
+        >
+          {messageTone === 'success' ? (
+            <CheckCircle2 size={16} />
+          ) : messageTone === 'error' ? (
+            <TriangleAlert size={16} />
+          ) : (
+            <MinusCircle size={16} />
+          )}
           {message}
         </p>
       )}

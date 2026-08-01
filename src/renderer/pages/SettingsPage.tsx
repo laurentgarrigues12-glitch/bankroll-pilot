@@ -8,7 +8,7 @@ import {
 } from 'react';
 import { Download, FileUp, LoaderCircle, ShieldCheck, Trash2, TriangleAlert } from 'lucide-react';
 import type { BankrollBackup } from '../../domain/bankroll/backup';
-import { backupFileName, parseBankrollBackup } from '../../domain/bankroll/backup';
+import { parseBankrollBackup } from '../../domain/bankroll/backup';
 import type { BankrollSettings } from '../../domain/bankroll/types';
 import {
   bankrollService,
@@ -35,15 +35,72 @@ const toCents = (value: string): number | null => {
   return Number(whole) * 100 + Number(fraction.padEnd(2, '0'));
 };
 
-const downloadBackup = (backup: BankrollBackup): void => {
-  const url = URL.createObjectURL(
-    new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' }),
-  );
+interface SaveFileHandle {
+  createWritable: () => Promise<{
+    write: (data: Blob) => Promise<void>;
+    close: () => Promise<void>;
+  }>;
+}
+
+interface OpenFileHandle {
+  getFile: () => Promise<File>;
+}
+
+type OpenFilePicker = (options: {
+  startIn: 'documents';
+  multiple: false;
+  excludeAcceptAllOption: true;
+  types: Array<{
+    description: string;
+    accept: Record<string, string[]>;
+  }>;
+}) => Promise<OpenFileHandle[]>;
+
+type SaveFilePicker = (options: {
+  suggestedName: string;
+  startIn: 'documents';
+  types: Array<{
+    description: string;
+    accept: Record<string, string[]>;
+  }>;
+}) => Promise<SaveFileHandle>;
+
+const saveBackup = async (backup: BankrollBackup): Promise<boolean> => {
+  const fileName = 'Sauvegarde Winamax.json';
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+  const saveFilePicker = (
+    window as typeof window & { showSaveFilePicker?: SaveFilePicker }
+  ).showSaveFilePicker;
+
+  if (saveFilePicker !== undefined) {
+    try {
+      const handle = await saveFilePicker({
+        suggestedName: fileName,
+        startIn: 'documents',
+        types: [
+          {
+            description: 'Sauvegarde Bankroll Pilot',
+            accept: { 'application/json': ['.json'] },
+          },
+        ],
+      });
+      const writable = await handle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+      return true;
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') return false;
+      throw error;
+    }
+  }
+
+  const url = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
   anchor.href = url;
-  anchor.download = backupFileName(new Date(backup.exportedAt));
+  anchor.download = fileName;
   anchor.click();
   URL.revokeObjectURL(url);
+  return true;
 };
 
 export function SettingsPage({
@@ -65,6 +122,7 @@ export function SettingsPage({
   const [backupBusy, setBackupBusy] = useState(false);
   const [backupMessage, setBackupMessage] = useState<string | null>(null);
   const [pendingBackup, setPendingBackup] = useState<BankrollBackup | null>(null);
+  const [pendingBackupFileName, setPendingBackupFileName] = useState<string | null>(null);
   const [resetPending, setResetPending] = useState(false);
   const [resetBusy, setResetBusy] = useState(false);
   const [resetMessage, setResetMessage] = useState<string | null>(null);
@@ -96,7 +154,7 @@ export function SettingsPage({
       await onSaved();
       setMessage('Configuration enregistrée.');
     } catch {
-      setMessage('La configuration n’a pas pu être enregistrée.');
+      setMessage(null);
     } finally {
       setSaving(false);
     }
@@ -105,32 +163,72 @@ export function SettingsPage({
     setBackupBusy(true);
     setBackupMessage(null);
     try {
-      downloadBackup(await bankrollService.createBackup());
-      setBackupMessage('Sauvegarde téléchargée avec succès.');
+      const saved = await saveBackup(await bankrollService.createBackup());
+      if (saved) setBackupMessage('Sauvegarde enregistrée avec succès.');
     } catch {
       setBackupMessage('La sauvegarde n’a pas pu être générée.');
     } finally {
       setBackupBusy(false);
     }
   };
-  const selectBackup = async (event: ChangeEvent<HTMLInputElement>): Promise<void> => {
-    const file = event.currentTarget.files?.[0];
-    event.currentTarget.value = '';
-    if (file === undefined) return;
+  const prepareBackupRestore = async (file: File): Promise<void> => {
     if (!file.name.toLowerCase().endsWith('.json') || file.size > 5 * 1024 * 1024) {
       setBackupMessage('Sélectionnez un fichier JSON de 5 Mo maximum.');
       return;
     }
     setBackupBusy(true);
     setBackupMessage(null);
+    setPendingBackupFileName(null);
     try {
-      setPendingBackup(parseBankrollBackup(JSON.parse(await file.text()) as unknown));
+      const backup = parseBankrollBackup(JSON.parse(await file.text()) as unknown);
+      setPendingBackup(backup);
+      setPendingBackupFileName(file.name);
     } catch (error) {
+      setPendingBackup(null);
       setBackupMessage(
-        error instanceof Error ? `Sauvegarde refusée : ${error.message}` : 'Sauvegarde invalide.',
+        error instanceof Error
+          ? `Sauvegarde Bankroll Pilot refusée : ${error.message}`
+          : 'Ce fichier n’est pas une sauvegarde Bankroll Pilot valide.',
       );
     } finally {
       setBackupBusy(false);
+    }
+  };
+
+  const selectBackup = async (event: ChangeEvent<HTMLInputElement>): Promise<void> => {
+    const file = event.currentTarget.files?.[0];
+    event.currentTarget.value = '';
+    if (file !== undefined) await prepareBackupRestore(file);
+  };
+
+  const chooseBackup = async (): Promise<void> => {
+    const openFilePicker = (
+      window as typeof window & { showOpenFilePicker?: OpenFilePicker }
+    ).showOpenFilePicker;
+
+    if (openFilePicker === undefined) {
+      fileInputRef.current?.click();
+      return;
+    }
+
+    setBackupMessage(null);
+    try {
+      const handles = await openFilePicker({
+        startIn: 'documents',
+        multiple: false,
+        excludeAcceptAllOption: true,
+        types: [
+          {
+            description: 'Sauvegarde Bankroll Pilot',
+            accept: { 'application/json': ['.json'] },
+          },
+        ],
+      });
+      const handle = handles[0];
+      if (handle !== undefined) await prepareBackupRestore(await handle.getFile());
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') return;
+      setBackupMessage('Le fichier de sauvegarde n’a pas pu être ouvert.');
     }
   };
   const restoreBackup = async (): Promise<void> => {
@@ -141,6 +239,7 @@ export function SettingsPage({
       await bankrollService.restoreBackup(pendingBackup);
       await onSaved();
       setPendingBackup(null);
+      setPendingBackupFileName(null);
       setBackupMessage('Sauvegarde restaurée avec succès.');
     } catch {
       setBackupMessage('La restauration a échoué. Les données existantes ont été conservées.');
@@ -186,12 +285,6 @@ export function SettingsPage({
               inputMode="decimal"
               required
             />
-          </label>
-          <label>
-            Devise
-            <select disabled value="EUR">
-              <option value="EUR">EUR</option>
-            </select>
           </label>
           <label>
             Date de départ
@@ -248,7 +341,7 @@ export function SettingsPage({
             className="button-secondary"
             type="button"
             disabled={backupBusy || readOnly}
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => void chooseBackup()}
           >
             <FileUp size={17} /> Restaurer une sauvegarde
           </button>
@@ -260,8 +353,8 @@ export function SettingsPage({
           <p className="section-kicker">ZONE SENSIBLE</p>
           <h2 id="reset-bankroll-title">Réinitialiser la bankroll</h2>
           <p>
-            Supprimez la bankroll initiale, les opérations, les résultats importés et l’historique du graphique.
-            Le dossier Winamax sélectionné reste mémorisé afin de pouvoir recommencer un nouvel import.
+            Remettez la bankroll actuelle, les opérations, les résultats et le graphique à zéro.
+            Le dossier Winamax sélectionné et les fichiers déjà traités restent mémorisés.
           </p>
         </div>
         <button
@@ -287,10 +380,9 @@ export function SettingsPage({
             <TriangleAlert size={26} />
             <h2 id="reset-confirmation-title">Confirmer la réinitialisation</h2>
             <p>
-              Cette action supprimera définitivement la bankroll initiale, les dépôts, les retraits,
-              les résultats Winamax importés et l’historique du graphique.
+              Cette action effacera définitivement toutes les données : bankroll, dépôts, retraits et fichiers
+              Winamax importés. Cette action est irréversible. Une sauvegarde est recommandée avant de continuer.
             </p>
-            <p>Cette action est irréversible. Une sauvegarde est recommandée avant de continuer.</p>
             <div>
               <button
                 className="text-button"
@@ -323,17 +415,21 @@ export function SettingsPage({
             <ShieldCheck size={24} />
             <h2 id="restore-title">Confirmer la restauration</h2>
             <p>
-              Sauvegarde du {new Date(pendingBackup.exportedAt).toLocaleString('fr-FR')} :{' '}
-              {pendingBackup.data.operations.length} opération(s), paramètres{' '}
-              {pendingBackup.data.settings === null ? 'absents' : 'présents'}.
+              Fichier sélectionné : <strong>{pendingBackupFileName ?? 'Sauvegarde Bankroll Pilot'}</strong>.
             </p>
-            <p>Cette action remplacera toutes les données locales actuelles.</p>
+            <p>
+              Sauvegarde du {new Date(pendingBackup.exportedAt).toLocaleString('fr-FR')}
+            </p>
+            <p>Cette action remplacera toutes les données actuelles.</p>
             <div>
               <button
                 className="text-button"
                 type="button"
                 disabled={backupBusy}
-                onClick={() => setPendingBackup(null)}
+                onClick={() => {
+                  setPendingBackup(null);
+                  setPendingBackupFileName(null);
+                }}
               >
                 Annuler
               </button>

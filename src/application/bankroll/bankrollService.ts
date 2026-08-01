@@ -1,5 +1,5 @@
 import { calculateBankroll } from '../../domain/bankroll/calculateBankroll';
-import { toCalendarDate } from '../../domain/bankroll/calendarDate';
+import { calendarDateFor, toCalendarDate } from '../../domain/bankroll/calendarDate';
 import type { BankrollSettings, FinancialOperation, FinancialOperationType, BankrollSnapshot, StoredHand } from '../../domain/bankroll/types';
 import { bankrollDatabase } from '../../infrastructure/storage/bankrollDatabase';
 import { parseBankrollBackup, type BankrollBackup } from '../../domain/bankroll/backup';
@@ -17,7 +17,15 @@ export const bankrollService = {
   saveSettings: async (settings: BankrollSettings): Promise<void> => { await accessService.assertCanPerform('save-settings'); await bankrollDatabase.saveSettings(settings); },
   createBackup: async (): Promise<BankrollBackup> => ({ format: 'bankroll-pilot-backup', version: 1, exportedAt: new Date().toISOString(), data: await bankrollDatabase.getBackupData() }),
   restoreBackup: async (candidate: unknown): Promise<BankrollBackup> => { await accessService.assertCanPerform('restore-backup'); const backup = parseBankrollBackup(candidate); await bankrollDatabase.replaceBackupData(backup.data); return backup; },
-  resetBankroll: async (): Promise<void> => { await accessService.assertCanPerform('save-settings'); await bankrollDatabase.resetBankrollData(); },
+  resetBankroll: async (): Promise<void> => {
+    await accessService.assertCanPerform('save-settings');
+    await bankrollDatabase.resetBankrollData({
+      id: 'current',
+      initialBankrollCents: 0,
+      currency: 'EUR',
+      startDate: calendarDateFor(new Date()),
+    });
+  },
   addOperation: async (input: Omit<FinancialOperation, 'id' | 'createdAt'>): Promise<void> => { await accessService.assertCanPerform('create-operation'); await bankrollDatabase.saveOperation({ ...input, id: createId(), createdAt: new Date().toISOString() }); },
   importWinamaxOperations: async (imports: WinamaxOperationImport[]): Promise<{ importedCount: number; duplicateCount: number }> => {
     await accessService.assertCanPerform('import-winamax');
