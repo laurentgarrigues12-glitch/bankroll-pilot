@@ -1,11 +1,23 @@
 import { trialDurationMilliseconds, type AccessClock, type AccessState } from '../../domain/access/types';
 
 export type DevelopmentAccessScenario = 'reset' | 'trial' | 'expired' | 'active' | 'unavailable';
-export interface AccessProvider { getAccess(): Promise<AccessState>; startTrial(): Promise<AccessState>; simulate?(scenario: DevelopmentAccessScenario): Promise<AccessState>; }
+export interface AccessProvider {
+  getAccess(): Promise<AccessState>;
+  startTrial(): Promise<AccessState>;
+  activateOwner?(token: string): Promise<AccessState>;
+  simulate?(scenario: DevelopmentAccessScenario): Promise<AccessState>;
+}
 interface StoredAccess { trialStartedAt?: string; active?: boolean; unavailable?: boolean; }
 const storageKey = 'bankroll-pilot.access.local.v1';
+const ownerAccessDigest = '376a1d1d5b3aa2f71179ece58dca1f5c3816b135af58810f7320e1f56f4ae905';
 const clock: AccessClock = { now: () => Date.now() };
 const unavailable = (now: number): AccessState => ({ status: 'unavailable', trialStartedAt: null, trialExpiresAt: null, remainingMilliseconds: 0, canRead: true, canWrite: false, canImport: false, canRestore: false, canExport: true, lastCheckedAt: new Date(now).toISOString() });
+
+const sha256 = async (value: string): Promise<string> => {
+  const bytes = new TextEncoder().encode(value);
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
+};
 
 export class LocalDevelopmentAccessProvider implements AccessProvider {
   constructor(private readonly accessClock: AccessClock = clock) {}
@@ -24,6 +36,10 @@ export class LocalDevelopmentAccessProvider implements AccessProvider {
   }
   async getAccess(): Promise<AccessState> { return this.state(this.read()); }
   async startTrial(): Promise<AccessState> { const current = this.read(); if (current.trialStartedAt === undefined) localStorage.setItem(storageKey, JSON.stringify({ ...current, trialStartedAt: new Date(this.accessClock.now()).toISOString() })); return this.getAccess(); }
+  async activateOwner(token: string): Promise<AccessState> {
+    if (await sha256(token) === ownerAccessDigest) localStorage.setItem(storageKey, JSON.stringify({ active: true }));
+    return this.getAccess();
+  }
   async simulate(scenario: DevelopmentAccessScenario): Promise<AccessState> {
     const now = this.accessClock.now();
     if (scenario === 'reset') localStorage.removeItem(storageKey);
@@ -38,8 +54,10 @@ export class LocalDevelopmentAccessProvider implements AccessProvider {
 export class UnavailableAccessProvider implements AccessProvider {
   async getAccess(): Promise<AccessState> { return unavailable(Date.now()); }
   async startTrial(): Promise<AccessState> { return unavailable(Date.now()); }
+  async activateOwner(): Promise<AccessState> { return unavailable(Date.now()); }
 }
 
 // The private beta has no backend: access and the 72-hour trial are stored locally in the browser.
+// The owner link activates permanent access only in the browser where it is opened.
 // Development simulations remain unavailable in production because accessService guards them with import.meta.env.DEV.
 export const accessProvider: AccessProvider = new LocalDevelopmentAccessProvider();

@@ -21,4 +21,13 @@ describe('LocalDevelopmentAccessProvider', () => {
     now = start + trialDurationMilliseconds;
     await expect(accessProvider.getAccess()).resolves.toMatchObject({ status: 'expired', remainingMilliseconds: 0, canWrite: false, canImport: false, canRestore: false, canExport: true });
   });
+
+  it('activates permanent owner access only with the private owner token', async () => {
+    const accessProvider = provider();
+
+    await expect(accessProvider.activateOwner('invalid-token')).resolves.toMatchObject({ status: 'not_started', canWrite: false });
+    await expect(accessProvider.activateOwner('gMvuGAmdulylgD4Us5vXe3E783vTQMQdbub_nKvnKm4')).resolves.toMatchObject({ status: 'active', canWrite: true, canImport: true });
+    await expect(accessProvider.getAccess()).resolves.toMatchObject({ status: 'active', canWrite: true });
+  });
+
 });
