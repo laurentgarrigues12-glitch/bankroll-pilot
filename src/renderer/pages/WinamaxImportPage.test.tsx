@@ -38,8 +38,9 @@ describe('WinamaxImportPage', () => {
     expect(screen.getByRole('heading', { name: 'Dossier Winamax' })).not.toBeNull();
     expect(screen.getByText('IMPORTATION')).not.toBeNull();
     expect(screen.getByRole('heading', { name: 'Avant le premier import' })).not.toBeNull();
-    expect(screen.getByText(/créez un dossier nommé/i)).not.toBeNull();
+    expect(screen.getByText(/Créez un dossier History/i)).not.toBeNull();
     expect(screen.getByText(/Paramètres → Tracker → Emplacement de l’historique des mains/i)).not.toBeNull();
+    expect(screen.getByText(/Cette configuration ne se fait qu’une seule fois/i)).not.toBeNull();
     expect(screen.getByRole('button', { name: 'Choisir le dossier Winamax' })).not.toBeNull();
     expect(screen.queryByText('Import manuel')).toBeNull();
     expect(screen.queryByText('Importer automatiquement les nouvelles mains')).toBeNull();

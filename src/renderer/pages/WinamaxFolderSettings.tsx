@@ -1,5 +1,5 @@
 import { type ReactElement, useEffect, useState } from 'react';
-import { CheckCircle2, FolderOpen, Info, MinusCircle, TriangleAlert } from 'lucide-react';
+import { CheckCircle2, FolderOpen, Info, MinusCircle, RefreshCw, Settings2, TriangleAlert } from 'lucide-react';
 import { bankrollService } from '../../application/bankroll/bankrollService';
 import { winamaxFolderService } from '../../application/winamax/winamaxFolderService';
 import { toWinamaxOperationImports } from '../../features/winamax/toWinamaxOperationImports';
@@ -136,23 +136,70 @@ export function WinamaxFolderSettings({
         </div>
         <div>
           <h3 id="winamax-first-import-title">Avant le premier import</h3>
-          <ol>
-            <li>
-              Dans le dossier <strong>Documents</strong> de votre ordinateur, créez un dossier nommé{' '}
-              <strong>History</strong>.
-            </li>
-            <li>
-              Dans Winamax :{' '}
-              <strong>Paramètres → Tracker → Emplacement de l’historique des mains</strong>.
-            </li>
-            <li>
-              Cliquez sur <strong>Changer</strong>, puis sélectionnez le dossier{' '}
-              <strong>History</strong> créé dans Documents.
-            </li>
-            <li>
-              Dans Bankroll Pilot, sélectionnez ce même dossier <strong>History</strong>.
-            </li>
-          </ol>
+          <div className="winamax-first-import-steps" role="list">
+            <div className="winamax-first-import-step" role="listitem">
+              <div className="winamax-first-import-step-icon" aria-hidden="true">
+                <FolderOpen size={17} />
+              </div>
+              <div>
+                <p className="winamax-first-import-step-title">
+                  <span className="winamax-first-import-step-index">1.</span> Créez un dossier
+                  History
+                </p>
+                <p className="winamax-first-import-step-copy">
+                  Dans <strong>Documents</strong>, créez un dossier nommé <strong>History</strong>.
+                </p>
+              </div>
+            </div>
+            <div className="winamax-first-import-step" role="listitem">
+              <div className="winamax-first-import-step-icon" aria-hidden="true">
+                <Settings2 size={17} />
+              </div>
+              <div>
+                <p className="winamax-first-import-step-title">
+                  <span className="winamax-first-import-step-index">2.</span> Ouvrez les réglages
+                  Winamax
+                </p>
+                <p className="winamax-first-import-step-copy">
+                  Dans <strong>Winamax</strong>, allez dans : <strong>Paramètres → Tracker →
+                  Emplacement de l’historique des mains</strong>
+                </p>
+              </div>
+            </div>
+            <div className="winamax-first-import-step" role="listitem">
+              <div className="winamax-first-import-step-icon" aria-hidden="true">
+                <RefreshCw size={17} />
+              </div>
+              <div>
+                <p className="winamax-first-import-step-title">
+                  <span className="winamax-first-import-step-index">3.</span> Choisissez le bon
+                  dossier
+                </p>
+                <p className="winamax-first-import-step-copy">
+                  Cliquez sur <strong>Changer</strong>, puis sélectionnez le dossier{' '}
+                  <strong>History</strong>.
+                </p>
+              </div>
+            </div>
+            <div className="winamax-first-import-step" role="listitem">
+              <div className="winamax-first-import-step-icon" aria-hidden="true">
+                <CheckCircle2 size={17} />
+              </div>
+              <div>
+                <p className="winamax-first-import-step-title">
+                  <span className="winamax-first-import-step-index">4.</span> Sélectionnez ce
+                  dossier dans Bankroll Pilot
+                </p>
+                <p className="winamax-first-import-step-copy">
+                  Dans <strong>Bankroll Pilot</strong>, choisissez ce même dossier{' '}
+                  <strong>History</strong>.
+                </p>
+              </div>
+            </div>
+          </div>
+          <p className="winamax-first-import-note">
+            Cette configuration ne se fait qu’une seule fois.
+          </p>
         </div>
       </aside>
 
