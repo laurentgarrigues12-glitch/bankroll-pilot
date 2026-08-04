@@ -1,0 +1,80 @@
+{
+  "name": "bankroll-pilot",
+  "version": "0.4.4",
+  "private": true,
+  "description": "Gestion de bankroll poker Winamax",
+  "scripts": {
+    "dev": "vite",
+    "dev:web": "vite",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings 0",
+    "test": "vitest run",
+    "electron:dev": "vite --host 127.0.0.1",
+    "desktop": "electron .",
+    "dist:win": "npm run build && electron-builder --win nsis --x64"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "latest",
+    "idb": "^8.0.3",
+    "lucide-react": "^1.28.0",
+    "react": "latest",
+    "react-dom": "latest",
+    "recharts": "^3.10.1",
+    "zod": "latest"
+  },
+  "devDependencies": {
+    "@eslint/js": "latest",
+    "@testing-library/jest-dom": "latest",
+    "@testing-library/react": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "eslint": "latest",
+    "eslint-plugin-react-hooks": "latest",
+    "eslint-plugin-react-refresh": "latest",
+    "fake-indexeddb": "^6.2.5",
+    "globals": "latest",
+    "jsdom": "latest",
+    "prettier": "latest",
+    "typescript": "latest",
+    "typescript-eslint": "latest",
+    "vite": "latest",
+    "vitest": "latest",
+    "electron": "^37.2.6",
+    "electron-builder": "^26.0.12"
+  },
+  "main": "electron/main.cjs",
+  "build": {
+    "appId": "fr.bankrollpilot.app",
+    "productName": "Bankroll Pilot",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "executableName": "Bankroll Pilot"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "perMachine": false,
+      "shortcutName": "Bankroll Pilot",
+      "runAfterFinish": true
+    },
+    "artifactName": "Bankroll-Pilot-Setup-${version}.${ext}"
+  }
+}

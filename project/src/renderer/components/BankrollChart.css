@@ -1,0 +1,90 @@
+.bankroll-chart {
+  width: 100%;
+  min-height: 320px;
+  padding: var(--space-3) 0 0;
+}
+.chart-state {
+  display: grid;
+  min-height: 300px;
+  gap: var(--space-3);
+  color: var(--color-text-secondary);
+  text-align: center;
+  place-content: center;
+}
+.chart-state svg {
+  margin: 0 auto;
+  color: var(--color-accent);
+}
+.error-state svg {
+  color: var(--color-error);
+}
+.chart-state p {
+  max-width: 22rem;
+  margin: 0;
+}
+.spin {
+  animation: chart-spin 0.9s linear infinite;
+}
+.chart-tooltip {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 164px;
+  padding: var(--space-3);
+  color: var(--color-text);
+  background: color-mix(in srgb, var(--color-surface-hover) 94%, #000);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(10px);
+}
+.chart-tooltip span {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+.chart-tooltip strong {
+  color: var(--color-text);
+  font-size: var(--text-base);
+}
+.chart-tooltip small {
+  font-size: var(--text-xs);
+}
+.chart-tooltip .positive {
+  color: var(--success);
+}
+.chart-tooltip .negative {
+  color: var(--error);
+}
+@keyframes chart-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (max-width: 480px) {
+  .bankroll-chart {
+    min-height: 280px;
+    padding-top: var(--space-2);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spin {
+    animation: none;
+  }
+}
+
+.chart-empty {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  min-height: 300px;
+  padding: var(--space-8);
+  text-align: center;
+  place-content: center;
+}
+.chart-empty h3 {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-lg);
+}
+.chart-empty p {
+  max-width: 29rem;
+  margin: 0;
+}

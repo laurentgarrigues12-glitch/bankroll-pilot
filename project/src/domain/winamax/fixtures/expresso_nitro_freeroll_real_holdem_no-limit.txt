@@ -1,0 +1,137 @@
+Winamax Poker - Tournament "Expresso Nitro Freeroll" buyIn: 0€ + 0€ level: 1 - HandId: #4961056752981245953-1-1784991682 - Holdem no limit (10/20) - 2026/07/25 15:01:22 UTC
+Table: 'Expresso Nitro Freeroll(1155086037)#0' 3-max (real money) Seat #2 is the button
+Seat 1: Player1 (300)
+Seat 2: Player2 (300)
+Seat 3: Hero (300)
+*** ANTE/BLINDS ***
+Hero posts small blind 10
+Player1 posts big blind 20
+Dealt to Hero [2d 8h]
+*** PRE-FLOP *** 
+Player2 raises 280 to 300 and is all-in
+Hero folds
+Player1 folds
+Player2 collected 330 from pot
+*** SUMMARY ***
+Total pot 330 | No rake
+Seat 2: Player2 (button) won 330
+
+
+Winamax Poker - Tournament "Expresso Nitro Freeroll" buyIn: 0€ + 0€ level: 1 - HandId: #4961056752981245953-2-1784991693 - Holdem no limit (10/20) - 2026/07/25 15:01:33 UTC
+Table: 'Expresso Nitro Freeroll(1155086037)#0' 3-max (real money) Seat #3 is the button
+Seat 1: Player1 (280)
+Seat 2: Player2 (330)
+Seat 3: Hero (290)
+*** ANTE/BLINDS ***
+Player1 posts small blind 10
+Player2 posts big blind 20
+Dealt to Hero [Ts 2s]
+*** PRE-FLOP *** 
+Hero folds
+Player1 raises 20 to 40
+Player2 calls 20
+*** FLOP *** [6d 8s 2c]
+Player1 bets 20
+Player2 raises 120 to 140
+Player1 calls 120
+*** TURN *** [6d 8s 2c][Kc]
+Player1 bets 20
+Player2 raises 130 to 150 and is all-in
+Player1 calls 80 and is all-in
+*** RIVER *** [6d 8s 2c Kc][As]
+*** SHOW DOWN ***
+Player1 shows [Kd Js] (One pair : Kings)
+Player2 shows [8d 5s] (One pair : 8)
+Player2 collected 50 from side pot 1
+Player1 collected 560 from main pot
+*** SUMMARY ***
+Total pot 610 | No rake
+Board: [6d 8s 2c Kc As]
+Seat 1: Player1 (small blind) showed [Kd Js] and won 560 with One pair : Kings
+Seat 2: Player2 (big blind) showed [8d 5s] and won 50 with One pair : 8
+
+
+Winamax Poker - Tournament "Expresso Nitro Freeroll" buyIn: 0€ + 0€ level: 1 - HandId: #4961056752981245953-3-1784991721 - Holdem no limit (10/20) - 2026/07/25 15:02:01 UTC
+Table: 'Expresso Nitro Freeroll(1155086037)#0' 3-max (real money) Seat #1 is the button
+Seat 1: Player1 (560)
+Seat 2: Player2 (50)
+Seat 3: Hero (290)
+*** ANTE/BLINDS ***
+Player2 posts small blind 10
+Hero posts big blind 20
+Dealt to Hero [Qd 2s]
+*** PRE-FLOP *** 
+Player1 calls 20
+Player2 raises 30 to 50 and is all-in
+Hero raises 240 to 290 and is all-in
+Player1 folds
+*** FLOP *** [Ks 8d 7d]
+*** TURN *** [Ks 8d 7d][6c]
+*** RIVER *** [Ks 8d 7d 6c][Td]
+*** SHOW DOWN ***
+Player2 shows [5s As] (High card : Ace)
+Hero shows [Qd 2s] (High card : King)
+Hero collected 240 from side pot 1
+Player2 collected 120 from main pot
+*** SUMMARY ***
+Total pot 360 | No rake
+Board: [Ks 8d 7d 6c Td]
+Seat 2: Player2 (small blind) showed [5s As] and won 120 with High card : Ace
+Seat 3: Hero (big blind) showed [Qd 2s] and won 240 with High card : King
+
+
+Winamax Poker - Tournament "Expresso Nitro Freeroll" buyIn: 0€ + 0€ level: 2 - HandId: #4961056752981245953-4-1784991758 - Holdem no limit (15/30) - 2026/07/25 15:02:38 UTC
+Table: 'Expresso Nitro Freeroll(1155086037)#0' 3-max (real money) Seat #2 is the button
+Seat 1: Player1 (540)
+Seat 2: Player2 (120)
+Seat 3: Hero (240)
+*** ANTE/BLINDS ***
+Hero posts small blind 15
+Player1 posts big blind 30
+Dealt to Hero [3h 9c]
+*** PRE-FLOP *** 
+Player2 raises 90 to 120 and is all-in
+Hero raises 120 to 240 and is all-in
+Player1 folds
+*** FLOP *** [6h 6c As]
+*** TURN *** [6h 6c As][8h]
+*** RIVER *** [6h 6c As 8h][2c]
+*** SHOW DOWN ***
+Player2 shows [4d 8s] (Two pairs : 8 and 6)
+Hero shows [3h 9c] (One pair : 6)
+Hero collected 120 from side pot 1
+Player2 collected 270 from main pot
+*** SUMMARY ***
+Total pot 390 | No rake
+Board: [6h 6c As 8h 2c]
+Seat 2: Player2 (button) showed [4d 8s] and won 270 with Two pairs : 8 and 6
+Seat 3: Hero (small blind) showed [3h 9c] and won 120 with One pair : 6
+
+
+Winamax Poker - Tournament "Expresso Nitro Freeroll" buyIn: 0€ + 0€ level: 2 - HandId: #4961056752981245953-5-1784991780 - Holdem no limit (15/30) - 2026/07/25 15:03:00 UTC
+Table: 'Expresso Nitro Freeroll(1155086037)#0' 3-max (real money) Seat #3 is the button
+Seat 1: Player1 (510)
+Seat 2: Player2 (270)
+Seat 3: Hero (120)
+*** ANTE/BLINDS ***
+Player1 posts small blind 15
+Player2 posts big blind 30
+Dealt to Hero [3h 6c]
+*** PRE-FLOP *** 
+Hero raises 90 to 120 and is all-in
+Player1 calls 105
+Player2 folds
+*** FLOP *** [2s 4d 7d]
+*** TURN *** [2s 4d 7d][4h]
+*** RIVER *** [2s 4d 7d 4h][Td]
+*** SHOW DOWN ***
+Hero shows [3h 6c] (One pair : 4)
+Player1 shows [5h 2d] (Two pairs : 4 and 2)
+Player1 collected 270 from pot
+*** SUMMARY ***
+Total pot 270 | No rake
+Board: [2s 4d 7d 4h Td]
+Seat 1: Player1 (small blind) showed [5h 2d] and won 270 with Two pairs : 4 and 2
+Seat 3: Hero (button) showed [3h 6c] and lost with One pair : 4
+
+

@@ -1,0 +1,159 @@
+import { fireEvent, render, screen, within } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+const mocks = vi.hoisted(() => ({
+  refresh: vi.fn().mockResolvedValue(undefined),
+  autoImport: vi.fn(),
+  data: {
+    settings: {
+      id: 'current' as const,
+      initialBankrollCents: 10000,
+      currency: 'EUR' as const,
+      startDate: '2026-07-01',
+    },
+    snapshot: {
+      currentCents: 12500,
+      pokerTodayCents: 500,
+      pokerMonthCents: 2500,
+      depositMonthCents: 1000,
+      withdrawalMonthCents: 200,
+      pokerTotalCents: 2500,
+    },
+    hands: [],
+    operations: [],
+  } as {
+    settings?: { id: 'current'; initialBankrollCents: number; currency: 'EUR'; startDate: string };
+    snapshot?: { currentCents: number; pokerTodayCents: number; pokerMonthCents: number; depositMonthCents: number; withdrawalMonthCents: number; pokerTotalCents: number };
+    hands: [];
+    operations: [];
+  },
+}));
+
+vi.mock('./hooks/useBankrollData', () => ({
+  useBankrollData: () => ({
+    data: mocks.data,
+    loading: false,
+    error: null,
+    refresh: mocks.refresh,
+  }),
+}));
+
+vi.mock('./hooks/useWinamaxAutoImport', () => ({
+  useWinamaxAutoImport: mocks.autoImport,
+}));
+
+vi.mock('./hooks/useAccessStatus', () => ({
+  useAccessStatus: () => ({
+    access: { status: 'trial', trialStartedAt: '2026-07-01T00:00:00.000Z', trialExpiresAt: '2026-07-04T00:00:00.000Z', remainingMilliseconds: 1, canRead: true, canWrite: true, canImport: true, canRestore: true, canExport: true, lastCheckedAt: '2026-07-01T00:00:00.000Z' },
+    loading: false,
+    error: null,
+    refresh: mocks.refresh,
+    startTrial: mocks.refresh,
+  }),
+}));
+
+import { App } from './App';
+
+describe('App', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+    mocks.autoImport.mockReset();
+    mocks.data.settings = {
+      id: 'current',
+      initialBankrollCents: 10000,
+      currency: 'EUR',
+      startDate: '2026-07-01',
+    };
+    mocks.data.snapshot = {
+      currentCents: 12500,
+      pokerTodayCents: 500,
+      pokerMonthCents: 2500,
+      depositMonthCents: 1000,
+      withdrawalMonthCents: 200,
+      pokerTotalCents: 2500,
+    };
+  });
+
+  it('mounts the real dashboard with its current metrics', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 6, 31, 12, 0, 0));
+
+    render(<App />);
+
+    expect(screen.getByText('31/07/2026')).not.toBeNull();
+    expect(screen.getByRole('img', { name: 'Bankroll Pilot' })).not.toBeNull();
+    expect(screen.getByText('Bankroll actuelle')).not.toBeNull();
+    expect(screen.getByText('Résultat du jour')).not.toBeNull();
+    expect(screen.getByText('Résultat du mois')).not.toBeNull();
+    expect(screen.getByText('Dépôt du mois')).not.toBeNull();
+    expect(screen.getByText('Retraits du mois')).not.toBeNull();
+    const cards = screen.getAllByRole('article');
+    expect(cards).toHaveLength(6);
+    expect(screen.getByRole('article', { name: 'Date' })).not.toBeNull();
+    expect(screen.getByRole('article', { name: 'Dépôt du mois' })).not.toBeNull();
+    expect(screen.getByRole('article', { name: 'Retraits du mois' })).not.toBeNull();
+    expect(screen.getByRole('article', { name: 'Résultat du mois' })).not.toBeNull();
+    expect(screen.getByRole('article', { name: 'Résultat du jour' })).not.toBeNull();
+    expect(screen.getByRole('article', { name: 'Bankroll actuelle' })).not.toBeNull();
+    expect(screen.queryByText('Premium')).toBeNull();
+    expect(screen.queryByText('Données de démonstration')).toBeNull();
+  });
+
+  it('opens the settings page through the existing navigation', () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Paramètres' }));
+
+    expect(screen.getByRole('heading', { name: 'Bankroll initiale' })).not.toBeNull();
+    expect(screen.getByRole('button', { name: 'Enregistrer' })).not.toBeNull();
+  });
+  it('keeps the reset bankroll visible at zero and allows future automatic imports', () => {
+    mocks.data.settings = { id: 'current', initialBankrollCents: 0, currency: 'EUR', startDate: '2026-07-31' };
+    mocks.data.snapshot = { currentCents: 0, pokerTodayCents: 0, pokerMonthCents: 0, depositMonthCents: 0, withdrawalMonthCents: 0, pokerTotalCents: 0 };
+
+    render(<App />);
+
+    expect(mocks.autoImport).toHaveBeenCalledWith(true, mocks.refresh);
+    const labels = [
+      'Dépôt du mois',
+      'Retraits du mois',
+      'Résultat du mois',
+      'Résultat du jour',
+      'Bankroll actuelle',
+    ];
+    for (const label of labels) {
+      const card = screen.getByRole('article', { name: label });
+      expect(within(card).getByText('0 €')).not.toBeNull();
+    }
+    expect(screen.queryByText('Configurez votre bankroll initiale')).toBeNull();
+  });
+
+  it('shows cent amounts without rounding them to zero or to a whole euro', () => {
+    mocks.data.snapshot = {
+      currentCents: -325,
+      pokerTodayCents: -25,
+      pokerMonthCents: -325,
+      depositMonthCents: 0,
+      withdrawalMonthCents: 0,
+      pokerTotalCents: -325,
+    };
+
+    render(<App />);
+
+    const metricValue = (label: string): string => {
+      const card = screen.getByRole('article', { name: label });
+      const value = card.querySelector('.summary-card-value');
+
+      if (!(value instanceof HTMLElement)) {
+        throw new Error(`Metric value not found: ${label}`);
+      }
+
+      return value.textContent?.replace(/\s/g, ' ') ?? '';
+    };
+
+    expect(metricValue('Bankroll actuelle')).toBe('-3,25 €');
+    expect(metricValue('Résultat du jour')).toBe('-0,25 €');
+    expect(metricValue('Résultat du mois')).toBe('-3,25 €');
+  });
+
+});

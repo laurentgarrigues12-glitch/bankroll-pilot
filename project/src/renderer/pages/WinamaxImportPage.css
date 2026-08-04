@@ -1,0 +1,578 @@
+.winamax-import-page {
+  display: grid;
+  gap: var(--space-5);
+}
+.winamax-import-heading {
+  display: grid;
+  gap: var(--space-1);
+  max-width: 46rem;
+}
+.winamax-import-heading h2 {
+  margin-bottom: var(--space-1);
+}
+.winamax-import-heading > p:last-child,
+.winamax-import-loading,
+.winamax-import-note {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+.winamax-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: var(--space-3);
+  padding: clamp(2rem, 5vw, 3.5rem) var(--space-5);
+  text-align: center;
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--color-surface) 92%, var(--color-accent)),
+    var(--color-surface)
+  );
+  border: 1px dashed color-mix(in srgb, var(--color-accent) 52%, var(--color-border));
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  transition:
+    background var(--transition-normal),
+    border-color var(--transition-normal),
+    transform var(--transition-normal),
+    box-shadow var(--transition-normal);
+}
+.winamax-dropzone:hover {
+  background: color-mix(in srgb, var(--color-surface-hover) 94%, var(--color-accent));
+  border-color: var(--color-accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card-hover);
+}
+.winamax-dropzone svg {
+  color: var(--color-accent);
+}
+.winamax-dropzone strong {
+  color: var(--color-text);
+  font-size: var(--text-lg);
+}
+.winamax-dropzone span {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+.winamax-choose-files-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 214px;
+  margin-top: var(--space-2);
+  padding: 0.75rem 1rem;
+  line-height: 1;
+  text-align: center;
+}
+.winamax-import-loading {
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
+  min-height: 36px;
+  padding: var(--space-2) var(--space-3);
+  background: color-mix(in srgb, var(--color-info) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-info) 28%, var(--color-border));
+  border-radius: var(--radius-md);
+}
+.winamax-preview {
+  display: grid;
+  gap: var(--space-4);
+}
+.winamax-final-summary {
+  display: grid;
+  grid-template-columns: auto repeat(4, minmax(0, 1fr));
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-4) var(--space-5);
+  color: var(--color-text-secondary);
+  background: color-mix(in srgb, var(--color-success) 8%, var(--color-surface));
+  border: 1px solid color-mix(in srgb, var(--color-success) 45%, var(--color-border));
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  font-size: var(--text-sm);
+}
+.winamax-final-summary strong {
+  color: var(--color-success);
+  font-size: var(--text-base);
+}
+.winamax-validation-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.winamax-validation-summary span {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  padding: var(--space-3);
+  color: var(--color-text-secondary);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  font-size: var(--text-sm);
+}
+.winamax-validation-summary span:nth-child(1) svg {
+  color: var(--color-success);
+}
+.winamax-validation-summary span:nth-child(2) svg {
+  color: var(--color-warning);
+}
+.winamax-validation-summary span:nth-child(3) svg {
+  color: var(--color-error);
+}
+.winamax-validation-summary strong {
+  margin-left: auto;
+  color: var(--color-text);
+  font-size: var(--text-lg);
+  font-variant-numeric: tabular-nums;
+}
+.winamax-file-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  overflow: hidden;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+}
+.winamax-file-card::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  content: '';
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--color-accent) 45%, transparent),
+    transparent
+  );
+}
+.winamax-file-card h3 {
+  overflow: hidden;
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--text-base);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.winamax-file-card p {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+.winamax-file-card dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(4.5rem, 1fr));
+  gap: var(--space-3);
+  min-width: 18rem;
+  margin: 0;
+}
+.winamax-file-card dl div {
+  display: grid;
+  gap: var(--space-1);
+  padding-left: var(--space-3);
+  border-left: 1px solid var(--color-border);
+}
+.winamax-file-card dt {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+.winamax-file-card dd {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--text-lg);
+  font-weight: 680;
+  font-variant-numeric: tabular-nums;
+}
+.winamax-import-error,
+.winamax-file-errors {
+  margin: 0;
+  color: var(--color-error);
+  font-size: var(--text-sm);
+}
+.winamax-import-error {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  background: color-mix(in srgb, var(--color-error) 9%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-error) 42%, var(--color-border));
+  border-radius: var(--radius-md);
+}
+.winamax-file-errors {
+  grid-column: 1 / -1;
+  padding: var(--space-3) var(--space-4) var(--space-3) calc(var(--space-4) + 1rem);
+  background: color-mix(in srgb, var(--color-error) 7%, transparent);
+  border-radius: var(--radius-md);
+}
+.winamax-table-wrapper {
+  overflow-x: auto;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+}
+.winamax-table-wrapper table {
+  width: 100%;
+  min-width: 44rem;
+  border-collapse: collapse;
+  background: var(--color-surface);
+}
+.winamax-table-wrapper th,
+.winamax-table-wrapper td {
+  padding: 0.85rem var(--space-3);
+  color: var(--color-text);
+  text-align: left;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
+  font-size: var(--text-sm);
+  vertical-align: top;
+}
+.winamax-table-wrapper th {
+  color: var(--color-text-secondary);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--color-surface-input);
+}
+.winamax-table-wrapper tbody tr {
+  transition: background var(--transition-fast);
+}
+.winamax-table-wrapper tbody tr:hover {
+  background: color-mix(in srgb, var(--color-accent) 7%, transparent);
+}
+.winamax-table-wrapper tr:last-child td {
+  border-bottom: 0;
+}
+.winamax-table-wrapper th:nth-child(4),
+.winamax-table-wrapper td:nth-child(4) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.validation-status {
+  display: inline-flex;
+  gap: 0.35rem;
+  align-items: center;
+  min-height: 28px;
+  padding: 0.22rem 0.5rem;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+}
+.validation-status.valid {
+  color: var(--color-success);
+  background: color-mix(in srgb, var(--color-success) 11%, transparent);
+  border-color: color-mix(in srgb, var(--color-success) 30%, var(--color-border));
+}
+.validation-status.warning {
+  color: var(--color-warning);
+  background: color-mix(in srgb, var(--color-warning) 11%, transparent);
+  border-color: color-mix(in srgb, var(--color-warning) 30%, var(--color-border));
+}
+.validation-status.error {
+  color: var(--color-error);
+  background: color-mix(in srgb, var(--color-error) 11%, transparent);
+  border-color: color-mix(in srgb, var(--color-error) 32%, var(--color-border));
+}
+.validation-message {
+  display: block;
+  max-width: 24rem;
+  margin-top: var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: var(--text-xs);
+  line-height: 1.45;
+}
+.winamax-preview > .secondary-button {
+  justify-self: start;
+  min-width: 11rem;
+}
+.winamax-preview .secondary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+.confirmation-backdrop {
+  z-index: 20;
+  padding: var(--space-5);
+}
+.confirmation-dialog {
+  width: min(31rem, 100%);
+  padding: clamp(var(--space-5), 5vw, var(--space-8));
+}
+.confirmation-dialog h2 {
+  margin-bottom: var(--space-3);
+}
+.confirmation-dialog p {
+  color: var(--color-text-secondary);
+  line-height: var(--leading-normal);
+}
+.confirmation-dialog div {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+@media (max-width: 820px) {
+  .winamax-final-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .winamax-final-summary strong {
+    grid-column: 1 / -1;
+  }
+  .winamax-file-card {
+    grid-template-columns: 1fr;
+  }
+  .winamax-file-card dl {
+    min-width: 0;
+  }
+}
+@media (max-width: 600px) {
+  .winamax-import-page {
+    gap: var(--space-4);
+  }
+  .winamax-dropzone {
+    padding: var(--space-8) var(--space-4);
+  }
+  .winamax-validation-summary {
+    grid-template-columns: 1fr;
+  }
+  .winamax-file-card {
+    padding: var(--space-4);
+  }
+  .winamax-file-card dl {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-2);
+  }
+  .winamax-file-card dl div {
+    padding-left: var(--space-2);
+  }
+  .winamax-file-card dd {
+    font-size: var(--text-base);
+  }
+  .winamax-table-wrapper {
+    margin-inline: calc(var(--space-5) * -1);
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+  }
+  .confirmation-backdrop {
+    padding: var(--space-3);
+  }
+  .confirmation-dialog div {
+    flex-direction: column-reverse;
+  }
+  .confirmation-dialog div button {
+    width: 100%;
+  }
+}
+
+/* Dossier Winamax */
+.winamax-folder-card {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.winamax-folder-header {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.winamax-folder-header h2,
+.winamax-folder-header p {
+  margin: 0;
+}
+
+.winamax-first-import-guide {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-info) 11%, var(--color-surface)),
+    color-mix(in srgb, var(--color-accent) 7%, var(--color-surface))
+  );
+  border: 1px solid color-mix(in srgb, var(--color-info) 38%, var(--color-border));
+  border-radius: var(--radius-md);
+}
+
+.winamax-first-import-guide-icon {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  color: var(--color-info);
+  background: color-mix(in srgb, var(--color-info) 13%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-info) 35%, var(--color-border));
+  border-radius: var(--radius-sm);
+  place-items: center;
+}
+
+.winamax-first-import-guide h3 {
+  margin: 0 0 var(--space-3);
+  color: var(--color-text);
+  font-size: var(--text-base);
+}
+
+.winamax-first-import-steps {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.winamax-first-import-step {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: start;
+}
+
+.winamax-first-import-step-icon {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 35%, var(--color-border));
+  border-radius: var(--radius-sm);
+  place-items: center;
+}
+
+.winamax-first-import-step-title,
+.winamax-first-import-step-copy,
+.winamax-first-import-note {
+  margin: 0;
+}
+
+.winamax-first-import-step-title {
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.winamax-first-import-step-index {
+  margin-right: 0.35rem;
+  color: var(--color-accent-strong);
+}
+
+.winamax-first-import-step-copy {
+  margin-top: 0.25rem;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+}
+
+.winamax-first-import-note {
+  margin-top: var(--space-3);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+
+.winamax-first-import-guide strong {
+  color: var(--color-text);
+}
+
+.winamax-folder-description,
+.winamax-folder-help,
+.winamax-folder-status,
+.winamax-folder-preview-summary p {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.winamax-folder-selection {
+  display: grid;
+  gap: 0.3rem;
+  padding: var(--space-4);
+  background: var(--color-surface-input);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.winamax-folder-selection span {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.winamax-folder-selection strong {
+  color: var(--color-text);
+  font-size: var(--text-lg);
+  overflow-wrap: anywhere;
+}
+
+.winamax-folder-selection small {
+  color: var(--color-text-secondary);
+  font-size: var(--text-xs);
+}
+
+.winamax-folder-primary-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.winamax-forget-folder {
+  padding-inline: 0;
+  white-space: nowrap;
+}
+
+.winamax-folder-help {
+  padding: var(--space-3) var(--space-4);
+  background: color-mix(in srgb, var(--color-info) 8%, transparent);
+  border-left: 3px solid color-mix(in srgb, var(--color-info) 65%, var(--color-border));
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}
+
+.winamax-folder-preview-summary {
+  display: grid;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+
+.winamax-folder-preview-summary .secondary-button {
+  justify-self: start;
+}
+
+.winamax-folder-status {
+  font-size: var(--text-sm);
+}
+
+@media (max-width: 600px) {
+  .winamax-first-import-guide {
+    grid-template-columns: 1fr;
+  }
+
+  .winamax-folder-primary-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .winamax-folder-primary-actions button,
+  .winamax-folder-preview-summary .secondary-button {
+    width: 100%;
+  }
+
+  .winamax-forget-folder {
+    align-self: flex-start;
+  }
+}
+
+.winamax-folder-status.system-message {
+  width: fit-content;
+  color: inherit;
+}
