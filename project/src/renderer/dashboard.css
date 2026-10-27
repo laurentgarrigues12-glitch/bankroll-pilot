@@ -256,6 +256,16 @@
   color: var(--success);
 }
 
+.summary-card-detail {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+
+
 .summary-card.negative .summary-card-value {
   color: var(--error);
 }
@@ -349,5 +359,11 @@
 
   .chart-card {
     padding: var(--space-5) var(--space-4) var(--space-2);
+  }
+}
+
+@media (min-width: 981px) {
+  .summary-cards-grid > .summary-card:last-child {
+    grid-column: 2;
   }
 }

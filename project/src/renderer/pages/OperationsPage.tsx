@@ -17,15 +17,22 @@ interface OperationsPageProps {
   readOnly?: boolean;
 }
 
-const toCents = (value: string): number | null => {
+const toCents = (
+  value: string,
+  signed = false,
+): number | null => {
   const normalized = value.trim().replace(',', '.');
 
-  if (!/^\d+(?:\.\d{1,2})?$/.test(normalized)) return null;
+  const pattern = signed
+    ? /^-?\d+(?:\.\d{1,2})?$/
+    : /^\d+(?:\.\d{1,2})?$/;
 
-  const [whole, fraction = ''] = normalized.split('.');
-  const cents = Number(whole) * 100 + Number(fraction.padEnd(2, '0'));
+  if (!pattern.test(normalized)) return null;
 
-  return cents > 0 ? cents : null;
+  const amount = Number(normalized);
+  const cents = Math.round(amount * 100);
+
+  return cents !== 0 ? cents : null;
 };
 
 const currency = new Intl.NumberFormat('fr-FR', {
@@ -39,11 +46,14 @@ const operationLabels: Record<Extract<FinancialOperationType, 'deposit' | 'withd
   withdrawal: 'Retrait',
 };
 
-const isCashMovement = (
+const isVisibleOperation = (
   operation: FinancialOperation,
 ): operation is FinancialOperation & {
-  type: Extract<FinancialOperationType, 'deposit' | 'withdrawal'>;
-} => operation.type === 'deposit' || operation.type === 'withdrawal';
+  type: VisibleOperationType;
+} =>
+  operation.type === 'deposit' ||
+  operation.type === 'withdrawal' ||
+  operation.type === 'correction';
 
 export function OperationsPage({
   operations,
@@ -51,7 +61,7 @@ export function OperationsPage({
   readOnly = false,
 }: OperationsPageProps): ReactElement {
   const [type, setType] =
-    useState<Extract<FinancialOperationType, 'deposit' | 'withdrawal'>>('deposit');
+    useState<VisibleOperationType>('deposit');
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [comment, setComment] = useState('');
@@ -60,17 +70,24 @@ export function OperationsPage({
   const [messageTone, setMessageTone] = useState<'success' | 'error'>('success');
   const cashMovementHistory = useMemo(
     () =>
-      operations.filter(isCashMovement).sort((left, right) => right.date.localeCompare(left.date)),
+      operations.filter(isVisibleOperation).sort((left, right) => right.date.localeCompare(left.date)),
     [operations],
   );
 
   const submit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
-    const amountCents = toCents(amount);
+    const amountCents = toCents(
+      amount,
+      type === 'correction',
+    );
 
     if (amountCents === null || date === '') {
       setMessageTone('error');
-      setMessage('Veuillez renseigner un montant positif valide et une date.');
+      setMessage(
+        type === 'correction'
+          ? 'Veuillez renseigner un montant non nul valide et une date.'
+          : 'Veuillez renseigner un montant positif valide et une date.',
+      );
       return;
     }
 
@@ -112,12 +129,13 @@ export function OperationsPage({
                 value={type}
                 onChange={(event) =>
                   setType(
-                    event.target.value as Extract<FinancialOperationType, 'deposit' | 'withdrawal'>,
+                    event.target.value as VisibleOperationType,
                   )
                 }
               >
                 <option value="deposit">Dépôt</option>
                 <option value="withdrawal">Retrait</option>
+                <option value="correction">Correctif</option>
               </select>
             </label>
             <label>

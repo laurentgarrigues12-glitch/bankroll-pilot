@@ -31,13 +31,14 @@ const initialStatus: WinamaxAutoImportStatus = {
 
 export function useWinamaxAutoImport(
   enabled: boolean,
-  onImported: () => Promise<void>,
+  onImported: (isInitialScan: boolean) => Promise<void>,
 ): WinamaxAutoImportStatus {
   const [status, setStatus] =
     useState<WinamaxAutoImportStatus>(initialStatus);
 
   const onImportedRef = useRef(onImported);
   const automaticFolderSearchAttemptedRef = useRef(false);
+  const initialScanCompletedRef = useRef(false);
 
   useEffect(() => {
     onImportedRef.current = onImported;
@@ -74,6 +75,8 @@ export function useWinamaxAutoImport(
       }
 
       importing = true;
+      const isInitialScan =
+        !initialScanCompletedRef.current;
 
       try {
         let configuration =
@@ -155,7 +158,9 @@ export function useWinamaxAutoImport(
           return;
         }
 
-        await onImportedRef.current();
+        if (!isInitialScan) {
+          await onImportedRef.current(false);
+        }
 
         if (!active) return;
 
@@ -190,6 +195,17 @@ export function useWinamaxAutoImport(
         });
       } finally {
         importing = false;
+
+        if (
+          isInitialScan &&
+          !initialScanCompletedRef.current
+        ) {
+          initialScanCompletedRef.current = true;
+
+          if (active) {
+            await onImportedRef.current(true);
+          }
+        }
       }
     };
 

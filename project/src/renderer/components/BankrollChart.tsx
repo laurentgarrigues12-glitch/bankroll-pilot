@@ -68,7 +68,7 @@ function ChartTooltip({
       <span>{point.date}</span>
 
       <strong>
-        {currency.format(point.bankroll)}
+        {currency.format(point.cumulativeResult)}
       </strong>
 
       <small className={resultClass}>
@@ -117,7 +117,7 @@ function LastPointLabel({
         strokeWidth={4}
         paintOrder="stroke"
       >
-        {currency.format(payload.bankroll)}
+        {currency.format(payload.cumulativeResult)}
       </text>
     </g>
   );
@@ -244,7 +244,7 @@ export function BankrollChart({
 
           <Line
             type="monotone"
-            dataKey="bankroll"
+            dataKey="cumulativeResult"
             stroke="var(--accent-secondary)"
             strokeWidth={3}
             dot={(props) => (

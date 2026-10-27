@@ -7,7 +7,7 @@ import { accessService } from '../access/accessService';
 import { isWinamaxImportedOperation, normalizeWinamaxOperation, winamaxSourceIdFor } from '../../domain/bankroll/winamaxOperation';
 
 export interface DashboardModel { settings?: BankrollSettings; snapshot?: BankrollSnapshot; hands: StoredHand[]; operations: FinancialOperation[]; }
-export interface BankrollChartPoint { date: string; bankroll: number; dailyResult: number; }
+export interface BankrollChartPoint { date: string; cumulativeResult: number; dailyResult: number; }
 export interface WinamaxOperationImport { type: FinancialOperationType; amountCents: number; date: string; comment: string; importKey: string; }
 export interface WinamaxOperationInspection { id: string; type: FinancialOperationType; amountCents: number; date: string; source?: string; sourceId?: string; description: string; metadata?: FinancialOperation['metadata']; }
 
@@ -57,16 +57,53 @@ export const bankrollService = {
   deleteOperation: async (id: string): Promise<void> => bankrollDatabase.deleteOperation(id),
   createOperation: (type: FinancialOperationType, amountCents: number, date: string, comment: string): Omit<FinancialOperation, 'id' | 'createdAt'> => ({ type, amountCents, date, comment: comment.trim() }),
   createChartSeries: (settings: BankrollSettings, hands: StoredHand[], operations: FinancialOperation[]): BankrollChartPoint[] => {
-    const deltas = new Map<string, number>();
-    const apply = (date: string, amount: number): void => { const calendarDate = toCalendarDate(date); deltas.set(calendarDate, (deltas.get(calendarDate) ?? 0) + amount); };
-    hands.forEach((hand) => apply(hand.playedAt, hand.netResultCents));
-    operations.forEach((operation) => apply(operation.date, operation.type === 'withdrawal' || operation.type === 'expense' ? -operation.amountCents : operation.amountCents));
-    let current = settings.initialBankrollCents;
-    const series: BankrollChartPoint[] = [{ date: settings.startDate, bankroll: current / 100, dailyResult: 0 }];
-    for (const [date, dailyCents] of [...deltas.entries()].sort(([left], [right]) => left.localeCompare(right))) {
-      current += dailyCents;
-      series.push({ date, bankroll: current / 100, dailyResult: dailyCents / 100 });
+    const dailyResults = new Map<string, number>();
+
+    const applyResult = (date: string, amount: number): void => {
+      const calendarDate = toCalendarDate(date);
+      dailyResults.set(
+        calendarDate,
+        (dailyResults.get(calendarDate) ?? 0) + amount,
+      );
+    };
+
+    hands.forEach((hand) => {
+      applyResult(hand.playedAt, hand.netResultCents);
+    });
+
+    operations
+      .filter(
+        (operation) =>
+          (operation.type === 'adjustment' &&
+            isWinamaxImportedOperation(operation)) ||
+          operation.type === 'correction',
+      )
+      .forEach((operation) => {
+        applyResult(operation.date, operation.amountCents);
+      });
+
+    let cumulativeCents = 0;
+
+    const series: BankrollChartPoint[] = [
+      {
+        date: settings.startDate,
+        cumulativeResult: 0,
+        dailyResult: 0,
+      },
+    ];
+
+    for (const [date, dailyCents] of [...dailyResults.entries()].sort(
+      ([left], [right]) => left.localeCompare(right),
+    )) {
+      cumulativeCents += dailyCents;
+
+      series.push({
+        date,
+        cumulativeResult: cumulativeCents / 100,
+        dailyResult: dailyCents / 100,
+      });
     }
+
     return series;
   },
 };

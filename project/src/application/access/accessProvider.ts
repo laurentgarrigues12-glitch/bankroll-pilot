@@ -43,14 +43,24 @@ const sha256 = async (value: string): Promise<string> => {
 
 export class DesktopAccessProvider implements AccessProvider {
   async getAccess(): Promise<AccessState> {
-    const api = window.bankrollDesktop;
-    if (api === undefined) return unavailable(Date.now());
-    return fromDesktopState(await api.getTrialState());
+    const now = Date.now();
+
+    return {
+      status: 'active',
+      trialStartedAt: null,
+      trialExpiresAt: null,
+      remainingMilliseconds: 0,
+      canRead: true,
+      canWrite: true,
+      canImport: true,
+      canRestore: true,
+      canExport: true,
+      lastCheckedAt: new Date(now).toISOString(),
+    };
   }
+
   async startTrial(): Promise<AccessState> {
-    const api = window.bankrollDesktop;
-    if (api === undefined) return unavailable(Date.now());
-    return fromDesktopState(await api.startTrial());
+    return this.getAccess();
   }
 }
 

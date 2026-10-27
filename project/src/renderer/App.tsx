@@ -1,4 +1,4 @@
-import { type ReactElement, useState } from 'react';
+﻿import { type ReactElement, useEffect, useRef, useState } from 'react';
 import {
   AlertCircle,
   ArrowDown,
@@ -26,6 +26,7 @@ import { OperationsPage } from './pages/OperationsPage';
 import { WinamaxImportPage } from './pages/WinamaxImportPage';
 import { useAccessStatus } from './hooks/useAccessStatus';
 import type { AccessState } from '../domain/access/types';
+import { isWinamaxImportedOperation } from '../domain/bankroll/winamaxOperation';
 import type { WinamaxImportDiagnostic } from './winamaxImportDiagnostic';
 import bankrollPilotLogo from './assets/bankroll-pilot-a1.svg';
 
@@ -50,12 +51,29 @@ export function App(): ReactElement {
   const [winamaxDiagnostic, setWinamaxDiagnostic] = useState<WinamaxImportDiagnostic | null>(null);
   const bankroll = useBankrollData();
   const accessStatus = useAccessStatus();
-useWinamaxAutoImport(
-  accessStatus.access !== null &&
-    accessStatus.access.status !== 'not_started' &&
-    accessStatus.access.status !== 'expired',
-  bankroll.refresh,
-);
+
+  const sessionStartedAt = useRef(Date.now());
+  const [
+    sessionBaselineOperationIds,
+    setSessionBaselineOperationIds,
+  ] = useState<Set<string> | null>(null);
+
+  useWinamaxAutoImport(
+    accessStatus.access !== null &&
+      accessStatus.access.status !== 'not_started' &&
+      accessStatus.access.status !== 'expired',
+    async (isInitialScan) => {
+      await bankroll.refresh();
+
+      if (isInitialScan) {
+        const latest = await bankrollService.load();
+
+        setSessionBaselineOperationIds(
+          new Set(latest.operations.map((operation) => operation.id)),
+        );
+      }
+    },
+  );
   if (accessStatus.loading || accessStatus.access === null)
     return (
       <div className="app-shell">
@@ -120,7 +138,13 @@ useWinamaxAutoImport(
         </header>
         <main className="content">
           <AccessBanner access={accessStatus.access} />
-          {page === 'Dashboard' && <Dashboard {...bankroll} />}
+          {page === 'Dashboard' && (
+              <Dashboard
+                {...bankroll}
+                sessionBaselineOperationIds={sessionBaselineOperationIds}
+                sessionStartedAt={sessionStartedAt.current}
+              />
+            )}
           {page === 'Opérations' && (
             <OperationsPage
               operations={bankroll.data?.operations ?? []}
@@ -259,8 +283,23 @@ function Dashboard({
   loading,
   error,
   refresh,
-}: ReturnType<typeof useBankrollData>): ReactElement {
+  sessionBaselineOperationIds,
+  sessionStartedAt,
+}: ReturnType<typeof useBankrollData> & {
+  sessionBaselineOperationIds: Set<string> | null;
+  sessionStartedAt: number;
+}): ReactElement {
   const [period, setPeriod] = useState<Period>('30');
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    const interval = window.setInterval(
+      () => setNow(Date.now()),
+      30_000,
+    );
+
+    return () => window.clearInterval(interval);
+  }, []);
   if (loading)
     return (
       <section className="empty-state">
@@ -297,12 +336,45 @@ function Dashboard({
   const displayed =
     period === '7' ? series.slice(-7) : period === '30' ? series.slice(-30) : series;
   const snapshot = data.snapshot;
+
+  const sessionResultCents =
+    sessionBaselineOperationIds === null
+      ? 0
+      : data.operations
+          .filter(
+            (operation) =>
+              !sessionBaselineOperationIds.has(operation.id) &&
+              (
+                (operation.type === 'adjustment' &&
+                  isWinamaxImportedOperation(operation)) ||
+                operation.type === 'correction'
+              ),
+          )
+          .reduce(
+            (sum, operation) => sum + operation.amountCents,
+            0,
+          );
+
+  const sessionElapsedMilliseconds = Math.max(
+    0,
+    now - sessionStartedAt,
+  );
+
+  const sessionHours =
+    sessionElapsedMilliseconds / 3_600_000;
+
+  const sessionHourlyCents =
+    sessionHours > 0
+      ? Math.round(sessionResultCents / sessionHours)
+      : 0;
+
   const summaryCards: {
     label: string;
     value: string;
     icon: typeof CalendarDays;
     tone?: 'accent' | 'positive' | 'negative';
     result?: number;
+    details?: string[];
   }[] = [
     {
       label: 'Date',
@@ -323,22 +395,31 @@ function Dashboard({
       tone: 'accent',
     },
     {
-      label: 'Résultat du mois',
-      value: signed(snapshot.pokerMonthCents),
-      icon: TrendingUp,
-      result: snapshot.pokerMonthCents,
-    },
-    {
       label: 'Résultat du jour',
       value: signed(snapshot.pokerTodayCents),
       icon: Target,
       result: snapshot.pokerTodayCents,
     },
     {
+      label: 'Résultat du mois',
+      value: signed(snapshot.pokerMonthCents),
+      icon: TrendingUp,
+      result: snapshot.pokerMonthCents,
+    },
+    {
       label: 'Bankroll actuelle',
       value: currency.format(snapshot.currentCents / 100),
       icon: Coins,
       tone: 'accent',
+    },
+    {
+      label: 'Résultat de la session',
+      value: signed(sessionResultCents),
+      icon: Target,
+      result: sessionResultCents,
+      details: [
+        `Durée : ${formatSessionDuration(sessionElapsedMilliseconds)} - Taux horaire : ${signed(sessionHourlyCents)}/h`,
+      ],
     },
   ];
   return (
@@ -362,7 +443,7 @@ function Dashboard({
           <span>Données réelles</span>
         </div>
         <div className="summary-cards-grid">
-          {summaryCards.map(({ label, value, icon: Icon, tone, result }) => {
+          {summaryCards.map(({ label, value, icon: Icon, tone, result, details }) => {
             const stateClass =
               result === undefined || result === 0
                 ? tone === 'accent'
@@ -390,6 +471,14 @@ function Dashboard({
                 <div className="summary-card-body">
                   <h3 id={headingId}>{label}</h3>
                   <p className="summary-card-value">{value}</p>
+                  {details?.map((detail) => (
+                    <p
+                      key={detail}
+                      className="summary-card-detail"
+                    >
+                      {detail}
+                    </p>
+                  ))}
                 </div>
               </article>
             );
@@ -400,7 +489,7 @@ function Dashboard({
         <div className="dashboard-heading">
           <div>
             <p className="section-kicker">ÉVOLUTION</p>
-            <h2>Bankroll</h2>
+            <h2>Résultats cumulés</h2>
           </div>
           <div className="period-filters">
             {(['7', '30', 'all'] as Period[]).map((value) => (
@@ -419,7 +508,18 @@ function Dashboard({
     </>
   );
 }
+function formatSessionDuration(milliseconds: number): string {
+  const totalMinutes = Math.floor(milliseconds / 60_000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  if (hours === 0) return `${minutes} min`;
+
+  return `${hours} h ${minutes.toString().padStart(2, '0')}`;
+}
+
 function signed(cents: number): string {
   if (cents === 0) return currency.format(0);
   return `${cents > 0 ? '+' : ''}${currency.format(cents / 100)}`;
 }
+
