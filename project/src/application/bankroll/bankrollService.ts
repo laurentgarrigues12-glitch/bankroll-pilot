@@ -7,7 +7,7 @@ import { accessService } from '../access/accessService';
 import { isWinamaxImportedOperation, normalizeWinamaxOperation, winamaxSourceIdFor } from '../../domain/bankroll/winamaxOperation';
 
 export interface DashboardModel { settings?: BankrollSettings; snapshot?: BankrollSnapshot; hands: StoredHand[]; operations: FinancialOperation[]; }
-export interface BankrollChartPoint { date: string; cumulativeResult: number; dailyResult: number; }
+export interface BankrollChartPoint { index: number; date: string; cumulativeResult: number; dailyResult: number; }
 export interface WinamaxOperationImport { type: FinancialOperationType; amountCents: number; date: string; comment: string; importKey: string; }
 export interface WinamaxOperationInspection { id: string; type: FinancialOperationType; amountCents: number; date: string; source?: string; sourceId?: string; description: string; metadata?: FinancialOperation['metadata']; }
 
@@ -57,18 +57,18 @@ export const bankrollService = {
   deleteOperation: async (id: string): Promise<void> => bankrollDatabase.deleteOperation(id),
   createOperation: (type: FinancialOperationType, amountCents: number, date: string, comment: string): Omit<FinancialOperation, 'id' | 'createdAt'> => ({ type, amountCents, date, comment: comment.trim() }),
   createChartSeries: (settings: BankrollSettings, hands: StoredHand[], operations: FinancialOperation[]): BankrollChartPoint[] => {
-    const dailyResults = new Map<string, number>();
-
-    const applyResult = (date: string, amount: number): void => {
-      const calendarDate = toCalendarDate(date);
-      dailyResults.set(
-        calendarDate,
-        (dailyResults.get(calendarDate) ?? 0) + amount,
-      );
-    };
+    const events: {
+      date: string;
+      amountCents: number;
+      order: string;
+    }[] = [];
 
     hands.forEach((hand) => {
-      applyResult(hand.playedAt, hand.netResultCents);
+      events.push({
+        date: toCalendarDate(hand.playedAt),
+        amountCents: hand.netResultCents,
+        order: hand.playedAt,
+      });
     });
 
     operations
@@ -79,30 +79,42 @@ export const bankrollService = {
           operation.type === 'correction',
       )
       .forEach((operation) => {
-        applyResult(operation.date, operation.amountCents);
+        events.push({
+          date: toCalendarDate(operation.date),
+          amountCents: operation.amountCents,
+          order: operation.createdAt,
+        });
       });
+
+    events.sort((left, right) => {
+      const dateOrder = left.date.localeCompare(right.date);
+
+      if (dateOrder !== 0) return dateOrder;
+
+      return left.order.localeCompare(right.order);
+    });
 
     let cumulativeCents = 0;
 
     const series: BankrollChartPoint[] = [
       {
+        index: 0,
         date: settings.startDate,
         cumulativeResult: 0,
         dailyResult: 0,
       },
     ];
 
-    for (const [date, dailyCents] of [...dailyResults.entries()].sort(
-      ([left], [right]) => left.localeCompare(right),
-    )) {
-      cumulativeCents += dailyCents;
+    events.forEach((event) => {
+      cumulativeCents += event.amountCents;
 
       series.push({
-        date,
+        index: series.length,
+        date: event.date,
         cumulativeResult: cumulativeCents / 100,
-        dailyResult: dailyCents / 100,
+        dailyResult: event.amountCents / 100,
       });
-    }
+    });
 
     return series;
   },

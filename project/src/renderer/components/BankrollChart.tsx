@@ -60,20 +60,27 @@ function ChartTooltip({
   }
 
   const point = payload[0].payload;
+
   const resultClass =
-    point.dailyResult >= 0 ? 'positive' : 'negative';
+    point.dailyResult > 0
+      ? 'positive'
+      : point.dailyResult < 0
+        ? 'negative'
+        : '';
+
+  const signedCurrency = (value: number): string =>
+    `${value > 0 ? '+' : ''}${currency.format(value)}`;
 
   return (
     <div className="chart-tooltip">
       <span>{point.date}</span>
 
       <strong>
-        {currency.format(point.cumulativeResult)}
+        Résultat cumulé : {signedCurrency(point.cumulativeResult)}
       </strong>
 
       <small className={resultClass}>
-        Résultat : {point.dailyResult >= 0 ? '+' : ''}
-        {currency.format(point.dailyResult)}
+        Gain/Perte : {signedCurrency(point.dailyResult)}
       </small>
     </div>
   );
@@ -211,7 +218,7 @@ export function BankrollChart({
           />
 
           <XAxis
-            dataKey="date"
+            dataKey="index"
             tick={{
               fill: 'var(--text-secondary)',
               fontSize: 11,
@@ -219,6 +226,9 @@ export function BankrollChart({
             tickLine={false}
             axisLine={false}
             interval="preserveStartEnd"
+            tickFormatter={(value: number) =>
+              data[value]?.date ?? ''
+            }
           />
 
           <YAxis
