@@ -9,6 +9,7 @@ import {
   Line,
   LineChart,
   ResponsiveContainer,
+  ReferenceLine,
   Tooltip,
   XAxis,
   YAxis,
@@ -242,6 +243,12 @@ export function BankrollChart({
               currency.format(value)
             }
             width={72}
+          />
+
+          <ReferenceLine
+            y={0}
+            stroke="#ff4d4d"
+            strokeWidth={1}
           />
 
           <Tooltip

@@ -63,6 +63,11 @@ export function App(): ReactElement {
       accessStatus.access.status !== 'not_started' &&
       accessStatus.access.status !== 'expired',
     async (isInitialScan) => {
+      const previousScrollY =
+        !isInitialScan && page === 'Dashboard'
+          ? window.scrollY
+          : null;
+
       await bankroll.refresh();
 
       if (isInitialScan) {
@@ -71,6 +76,17 @@ export function App(): ReactElement {
         setSessionBaselineOperationIds(
           new Set(latest.operations.map((operation) => operation.id)),
         );
+      }
+
+      if (previousScrollY !== null) {
+        window.requestAnimationFrame(() => {
+          window.requestAnimationFrame(() => {
+            window.scrollTo({
+              top: previousScrollY,
+              behavior: 'auto',
+            });
+          });
+        });
       }
     },
   );
@@ -333,8 +349,29 @@ function Dashboard({
       </section>
     );
   const series = bankrollService.createChartSeries(data.settings, data.hands, data.operations);
-  const displayed =
-    period === '7' ? series.slice(-7) : period === '30' ? series.slice(-30) : series;
+  const displayed = (() => {
+    let filtered = series;
+
+    if (period !== 'all') {
+      const days = Number(period);
+      const cutoff = new Date(now);
+
+      cutoff.setHours(0, 0, 0, 0);
+      cutoff.setDate(cutoff.getDate() - (days - 1));
+
+      const cutoffDate = [
+        cutoff.getFullYear(),
+        String(cutoff.getMonth() + 1).padStart(2, '0'),
+        String(cutoff.getDate()).padStart(2, '0'),
+      ].join('-');
+
+      filtered = series.filter(
+        (point) => point.date >= cutoffDate,
+      );
+    }
+
+    return filtered.slice(-30);
+  })();
   const snapshot = data.snapshot;
 
   const sessionResultCents =
