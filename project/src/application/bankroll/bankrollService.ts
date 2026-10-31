@@ -56,7 +56,11 @@ export const bankrollService = {
   },
   deleteOperation: async (id: string): Promise<void> => bankrollDatabase.deleteOperation(id),
   createOperation: (type: FinancialOperationType, amountCents: number, date: string, comment: string): Omit<FinancialOperation, 'id' | 'createdAt'> => ({ type, amountCents, date, comment: comment.trim() }),
-  createChartSeries: (settings: BankrollSettings, hands: StoredHand[], operations: FinancialOperation[]): BankrollChartPoint[] => {
+  createChartSeries: (
+    settings: BankrollSettings,
+    hands: StoredHand[],
+    operations: FinancialOperation[],
+  ): BankrollChartPoint[] => {
     const events: {
       date: string;
       amountCents: number;

@@ -226,9 +226,16 @@ export function BankrollChart({
             }}
             tickLine={false}
             axisLine={false}
-            interval="preserveStartEnd"
+            ticks={data
+              .filter(
+                (point, index) =>
+                  index === 0 ||
+                  point.date !== data[index - 1]?.date,
+              )
+              .map((point) => point.index)}
+            interval={0}
             tickFormatter={(value: number) =>
-              data[value]?.date ?? ''
+              data.find((point) => point.index === value)?.date ?? ''
             }
           />
 

@@ -31,7 +31,7 @@ import type { WinamaxImportDiagnostic } from './winamaxImportDiagnostic';
 import bankrollPilotLogo from './assets/bankroll-pilot-a1.svg';
 
 type Page = 'Dashboard' | 'Opérations' | 'Import Winamax' | 'Paramètres';
-type Period = '7' | '30' | 'all';
+type Period = '1' | '7' | '30' | 'all';
 const navigation: { label: Page; icon: typeof LayoutDashboard }[] = [
   { label: 'Dashboard', icon: LayoutDashboard },
   { label: 'Opérations', icon: CreditCard },
@@ -350,28 +350,102 @@ function Dashboard({
     );
   const series = bankrollService.createChartSeries(data.settings, data.hands, data.operations);
   const displayed = (() => {
-    let filtered = series;
+    if (period === 'all') return series;
 
-    if (period !== 'all') {
-      const days = Number(period);
-      const cutoff = new Date(now);
+    const days = Number(period);
+    const cutoff = new Date(now);
 
-      cutoff.setHours(0, 0, 0, 0);
-      cutoff.setDate(cutoff.getDate() - (days - 1));
+    cutoff.setHours(0, 0, 0, 0);
+    cutoff.setDate(cutoff.getDate() - (days - 1));
 
-      const cutoffDate = [
-        cutoff.getFullYear(),
-        String(cutoff.getMonth() + 1).padStart(2, '0'),
-        String(cutoff.getDate()).padStart(2, '0'),
-      ].join('-');
+    const cutoffDate = [
+      cutoff.getFullYear(),
+      String(cutoff.getMonth() + 1).padStart(2, '0'),
+      String(cutoff.getDate()).padStart(2, '0'),
+    ].join('-');
 
-      filtered = series.filter(
-        (point) => point.date >= cutoffDate,
-      );
+    const filtered = series.filter(
+      (point) => point.date >= cutoffDate,
+    );
+
+    if (period !== '1' || filtered.length === 0) {
+      return filtered;
     }
 
-    return filtered.slice(-30);
+    const firstPoint = filtered[0];
+    const startOfDayResult =
+      firstPoint.cumulativeResult - firstPoint.dailyResult;
+
+    const rebased = filtered.map((point) => ({
+      ...point,
+      cumulativeResult:
+        point.cumulativeResult - startOfDayResult,
+    }));
+
+    const startPoint = {
+      index: 0,
+      date: cutoffDate,
+      cumulativeResult: 0,
+      dailyResult: 0,
+    };
+
+    return [startPoint, ...rebased].map(
+      (point, index) => ({
+        ...point,
+        index,
+      }),
+    );
   })();
+
+  const dailyTracking = (() => {
+    const totals = new Map<string, number>();
+
+    data.hands.forEach((hand) => {
+      const playedAt = new Date(hand.playedAt);
+
+      const date = [
+        playedAt.getFullYear(),
+        String(playedAt.getMonth() + 1).padStart(2, '0'),
+        String(playedAt.getDate()).padStart(2, '0'),
+      ].join('-');
+
+      totals.set(
+        date,
+        (totals.get(date) ?? 0) + hand.netResultCents / 100,
+      );
+    });
+
+    data.operations
+      .filter(
+        (operation) =>
+          (operation.type === 'adjustment' &&
+            isWinamaxImportedOperation(operation)) ||
+          operation.type === 'correction',
+      )
+      .forEach((operation) => {
+        totals.set(
+          operation.date,
+          (totals.get(operation.date) ?? 0) +
+            operation.amountCents / 100,
+        );
+      });
+
+    let cumulative = 0;
+
+    return [...totals.entries()]
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([date, result]) => {
+        cumulative += result;
+
+        return {
+          date,
+          result,
+          cumulative,
+        };
+      })
+      .reverse();
+  })();
+
   const snapshot = data.snapshot;
 
   const sessionResultCents =
@@ -529,19 +603,89 @@ function Dashboard({
             <h2>Résultats cumulés</h2>
           </div>
           <div className="period-filters">
-            {(['7', '30', 'all'] as Period[]).map((value) => (
+            {(['1', '7', '30', 'all'] as Period[]).map((value) => (
               <button
                 key={value}
                 className={period === value ? 'period-button active' : 'period-button'}
                 onClick={() => setPeriod(value)}
               >
-                {value === 'all' ? 'Tout' : `${value} jours`}
+                {value === 'all' ? 'Tout' : value === '1' ? '1 jour' : `${value} jours`}
               </button>
             ))}
           </div>
         </div>
         <BankrollChart data={displayed} state={displayed.length === 0 ? 'empty' : 'ready'} />
       </section>
+
+      <section
+        className="daily-tracking-card"
+        aria-labelledby="daily-tracking-title"
+      >
+        <div className="dashboard-heading">
+          <div>
+            <p className="section-kicker">SUIVI</p>
+            <h2 id="daily-tracking-title">Suivi journalier</h2>
+          </div>
+        </div>
+
+        {dailyTracking.length === 0 ? (
+          <p className="daily-tracking-empty">
+            Aucun résultat journalier disponible.
+          </p>
+        ) : (
+          <div className="daily-tracking-table-wrapper">
+            <table className="daily-tracking-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Gain / Perte</th>
+                  <th>Cumul</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {dailyTracking.map((day) => (
+                  <tr key={day.date}>
+                    <td>
+                      {localDate.format(
+                        new Date(`${day.date}T12:00:00`),
+                      )}
+                    </td>
+
+                    <td
+                      className={
+                        day.result > 0
+                          ? 'positive'
+                          : day.result < 0
+                            ? 'negative'
+                            : ''
+                      }
+                    >
+                      {day.result > 0 ? '+' : ''}
+                      {currency.format(day.result)}
+                    </td>
+
+                    <td
+                      className={
+                        day.cumulative > 0
+                          ? 'positive'
+                          : day.cumulative < 0
+                            ? 'negative'
+                            : ''
+                      }
+                    >
+                      {day.cumulative > 0 ? '+' : ''}
+                      {currency.format(day.cumulative)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+
     </>
   );
 }
